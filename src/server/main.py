@@ -19,3 +19,10 @@ def read_root():
         "status": "ok", 
         "timestamp": datetime.now(timezone.utc).isoformat()
         }
+
+#update this as we code tests, should be a string i.e "AI analysis"
+@app.get("/tests")
+def read_root():
+    return {
+        "implementedTests": []
+        }
