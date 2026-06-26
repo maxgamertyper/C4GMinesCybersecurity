@@ -1,2 +1,5 @@
 # Ignore VS Code configuration directory
 .vscode/
+
+# big scary environment and secret tokens
+.env
