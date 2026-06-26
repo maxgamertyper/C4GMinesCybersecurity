@@ -95,7 +95,7 @@ def test_succeed(text:str, routeName: str):
 
 
 # the actual test module
-def get_route_test(routeTestInformation: RouteTestRecord):
+def route_test(routeTestInformation: RouteTestRecord):
     # generic response object
     response = None
 
@@ -153,7 +153,7 @@ def get_route_test(routeTestInformation: RouteTestRecord):
                 test_information("Expected: {" + key + ": " + expectedValue + "}\nGot: {" + key + ": " + responseDict[key] + "}")
             #if the value should exist and the key is there but has no value
             if not valueExists and responseDict[key]==None:
-                test_alert("Expected " + key + " to have a value, recieve None", cleanName)
+                test_alert("Expected " + key + " to have a value, recieved None", cleanName)
                 return
             
         except KeyError: # if the key isnt in the response
@@ -173,6 +173,6 @@ def test_endpoints(MASTER_ROUTE_TEST: list):
 
         print("[bold blue]Testing Route: " + cleanName + " at "+ cleanAddress + "[/bold blue]")
 
-        get_route_test(routeTestRecord)
+        route_test(routeTestRecord)
 
 test_endpoints(MASTER_ROUTE_TEST)
