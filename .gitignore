@@ -3,3 +3,8 @@
 
 # big scary environment and secret tokens
 .env
+
+# Ignore generated pycache files
+__pycache__/
+*.py[cod]
+*$py.class

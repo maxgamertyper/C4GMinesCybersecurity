@@ -3,14 +3,14 @@ from server import utility
 from server import fileHandler
 
 app = FastAPI()
-VERISON = "0.0.1"
+VERSION = "0.0.1"
 
 # To start the server run "fastapi dev ./src/server/main.py" if in the full repository, otherwise just "fastapi dev"
 @app.get("/", status_code=status.HTTP_200_OK)
 def read_root():
     return {
         "sourceURL": "https://github.com/maxgamertyper/C4GMinesCybersecurity/tree/main",
-        "version": VERISON,
+        "version": VERSION,
         "environment": "production"
         }
 
