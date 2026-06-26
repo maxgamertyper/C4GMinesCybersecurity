@@ -1,120 +1,178 @@
 import requests
 from rich import print
+from rich.markup import escape
+from dataclasses import dataclass
 
 BASE_SERVER_IP_ADDRESS = "http://127.0.0.1:8000"
 
-def test_warning(text:str):
-    print("[bold yellow][Warning!][/bold yellow]: " + text)
 
-def test_alert(text:str):
-    print("[bold red][Alert!][/bold red]: " + text)
+@dataclass
+class RouteTestRecord:
+    routeAddress: str # the address of the endpoint i.e "/" or "/health"
+    responsePayload: dict # how the json response should look {"key": "value"} for a specific response {"key": None} for a generic response that just includes the key
+    statusCode: int # the wanted return status code, 200 is mainly for gets
+    routeName: str # the name i.e "Root", "Tests", "Health"
+    isGET: bool # whether its a get or post request, feedback is a POST, health and tests are GET
+    postPayload: dict = None # if isGET is false, this will send a post request with this payload instead of a get
+
+
+
+#once all tests are made, append them to master test list
+MASTER_ROUTE_TEST = []
+
+# the expected response for root aka "/"
+expectedRootPayload = {
+    "sourceURL": "https://github.com/maxgamertyper/C4GMinesCybersecurity/tree/main",
+    "version": None, # means that it can reply with anything, just checking if the key is present
+    "environment": "production"
+    }
+rootEndpoint = RouteTestRecord(
+    routeAddress = "/",
+    responsePayload = expectedRootPayload,
+    statusCode = 200,
+    routeName = "Root",
+    isGET = True
+    )
+MASTER_ROUTE_TEST.append(rootEndpoint)
+
+# /tests endpoint
+expectedTestsPayload = {
+    "implementedTests": None # check if key is present
+    }
+testsEndpoint = RouteTestRecord(
+    routeAddress = "/tests",
+    responsePayload = expectedTestsPayload,
+    statusCode = 200,
+    routeName = "Tests",
+    isGET = True
+    )
+MASTER_ROUTE_TEST.append(testsEndpoint)
+
+# /health endpoint
+expectedHealthPayload = {
+    "status": "ok", 
+    "timestamp": None # check if present
+    }
+healthEndpoint = RouteTestRecord(
+    routeAddress = "/health",
+    responsePayload = expectedHealthPayload,
+    statusCode = 200,
+    routeName = "Health",
+    isGET = True
+    )
+MASTER_ROUTE_TEST.append(healthEndpoint)
+
+# /feedback endpoint
+expectedFeedbackPayload = {
+    "timestamp": None
+}
+feedbackEndpoint = RouteTestRecord(
+    routeAddress = "/feedback",
+    responsePayload = expectedFeedbackPayload,
+    statusCode = 200,
+    routeName = "Feedback",
+    isGET = False,
+    postPayload = {"feedback":"Hello, this is a feedback test"}
+    )
+MASTER_ROUTE_TEST.append(feedbackEndpoint)
+
+
+
+
+# the differnt print statements for tests
+# the \\ is an escape sequence so the Rich library doesn't treat it as mark up and instead just a normal string
+def test_warning(text:str, routeName: str):
+    print("[bold yellow]\\[Warning from " + routeName + "!][/bold yellow]: " + text)
+
+def test_alert(text:str, routeName: str):
+    print("[bold red]\\[Alert from " + routeName + "!][/bold red]: " + text)
 
 def test_information(text:str):
-    print("[bold][Information][/bold]: " + text)
+    print("[bold]\\[Information][/bold]: " + text)
 
-def test_succeed(text:str):
-    print("[bold green][Success!][/bold green]: " + text)
+def test_succeed(text:str, routeName: str):
+    print("[bold green]\\[" + routeName + " Succeeded!][/bold green]: " + text)
 
 
-#I'll combine these into a more compact function tomorrow, one for get requests and one for posts
-
-def default_path_test():
+# the actual test module
+def get_route_test(routeTestInformation: RouteTestRecord):
+    # generic response object
     response = None
 
+    #cleaning up the variables in the record holder
+    routeAddress = routeTestInformation.routeAddress
+    cleanName = "\""+routeTestInformation.routeName+"\""
+    expectedStatusCode = routeTestInformation.statusCode
+    isGETRequest = routeTestInformation.isGET
+    postPayload = routeTestInformation.postPayload
+
+    #testing malformed
+    if isGETRequest==False and postPayload==None:
+        test_alert("Malformed test body, set as post request with no post body", cleanName)
+        return
+    elif isGETRequest==True and postPayload!=None:
+        test_alert("Malformed test body, set as get request with a set post body", cleanName)
+        return
+
+    #default connection test
     try:
-        response = requests.get(BASE_SERVER_IP_ADDRESS)
+        if isGETRequest:
+            response = requests.get(BASE_SERVER_IP_ADDRESS + routeAddress)
+        else:
+            response = requests.post(BASE_SERVER_IP_ADDRESS + routeAddress, json=postPayload)
+        
     except requests.exceptions.ConnectionError:
-        test_alert("Server is not responding, you may need to start it with \"fastapi dev\"")
+        test_alert("Server is not responding, you may need to start it with \"fastapi dev\"", cleanName)
         return
     
-    if response.status_code != 200:
-        test_alert("Default gateway responded incorrectly")
+    recievedStatusCode = response.status_code
+
+    #staus code check
+    if recievedStatusCode != expectedStatusCode:
+        test_alert("Responded incorrectly", cleanName)
+        test_information("Recieved status code: " + str(recievedStatusCode) + "\nExpected: " + str(expectedStatusCode))
         return
 
+    # payload check
     responseDict = response.json()
+    expectedPayload = routeTestInformation.responsePayload
 
-    try:
-        if responseDict["environment"] != "production" or responseDict["sourceURL"] != "https://github.com/maxgamertyper/C4GMinesCybersecurity/tree/main" or responseDict["version"] == None:
-            test_warning("Server didn't respond as expected in base path!")
+    #if the response has more keys, it has another body answer
+    if len(responseDict.keys()) > len(expectedPayload.keys()):
+        test_warning("Responded with extra information", cleanName)
+
+    # check for key matches in the response and record
+    for key in expectedPayload.keys():
+        try:
+            expectedValue = expectedPayload[key]
+            valueExists = expectedValue!=None
+
+            #if the expected value is set and it doesnt equal it
+            if valueExists and responseDict[key]!=expectedValue:
+                test_warning("Unexpected key value", cleanName)
+                test_information("Expected: {" + key + ": " + expectedValue + "}\nGot: {" + key + ": " + responseDict[key] + "}")
+            #if the value should exist and the key is there but has no value
+            if not valueExists and responseDict[key]==None:
+                test_alert("Expected " + key + " to have a value, recieve None", cleanName)
+                return
+            
+        except KeyError: # if the key isnt in the response
+            test_alert("Missing informaiton detected (key: " + key + ")", cleanName)
             test_information("Response: \n" + str(responseDict))
-        else:
-            test_succeed("Default gateway responded correctly")
-    except KeyError:
-        test_alert("Missing informaiton detected in default gateway!")
-        test_information("Response: \n" + str(responseDict))
-
-
-def health_test():
-    response = None
-
-    try:
-        response = requests.get(BASE_SERVER_IP_ADDRESS + "/health")
-    except requests.exceptions.ConnectionError:
-        test_alert("Server is not responding, you may need to start it with \"fastapi dev\"")
-        return
-
-    if response.status_code != 200:
-        test_alert("Health gateway responded incorrectly")
-        return
+            return
     
-    responseDict = response.json()
-
-    try:
-        if responseDict["status"] != "ok" or responseDict["timestamp"] == None:
-            test_warning("Server didn't respond as expected in \"/health\" path!")
-            test_information("Response: \n" + str(responseDict))
-        else:
-            test_succeed("Health gateway responded correctly")
-    except KeyError:
-        test_alert("Missing informaiton detected in \"/health\" path!!")
-        test_information("Response: \n" + str(responseDict))
-
-
-def implemented_test():
-    response = None
-
-    try:
-        response = requests.get(BASE_SERVER_IP_ADDRESS + "/tests")
-    except requests.exceptions.ConnectionError:
-        test_alert("Server is not responding, you may need to start it with \"fastapi dev\"")
-        return
-
-    if response.status_code != 200:
-        test_alert("Tests gateway responded incorrectly")
-        return
     
-    responseDict = response.json()
-
-    try:
-        if responseDict["implementedTests"] == None:
-            test_warning("Server didn't respond as expected in \"/tests\" path!")
-            test_information("Response: \n" + str(responseDict))
-        else:
-            test_succeed("Tests gateway responded correctly")
-    except KeyError:
-        test_alert("Missing informaiton detected in \"/tests\" path!!")
-        test_information("Response: \n" + str(responseDict))
+    test_succeed("responded correctly", routeTestInformation.routeName) # not clean name as it looks weird with quotes
 
 
-def feedback_test():
-    TEST_FEEDBACK = "Hello, this is a feedback test"
+# the master loop that checks every test and actually tests it
+def test_endpoints(MASTER_ROUTE_TEST: list):
+    for routeTestRecord in MASTER_ROUTE_TEST:
+        cleanName = "\""+routeTestRecord.routeName+"\""
+        cleanAddress = "\""+routeTestRecord.routeAddress+"\""
 
-    response = None
+        print("[bold blue]Testing Route: " + cleanName + " at "+ cleanAddress + "[/bold blue]")
 
-    try:
-        response = requests.post(BASE_SERVER_IP_ADDRESS + "/feedback",json={"feedback":TEST_FEEDBACK})
-    except requests.exceptions.ConnectionError:
-        test_alert("Server is not responding, you may need to start it with \"fastapi dev\"")
-        return
+        get_route_test(routeTestRecord)
 
-    if response.status_code != 204:
-        test_alert("Feedback gateway responded incorrectly in \"/feedback\" path!")
-    else: 
-        test_succeed("Feedback gateway responded correctly")
-
-
-
-default_path_test()
-health_test()
-implemented_test()
-feedback_test()
+test_endpoints(MASTER_ROUTE_TEST)

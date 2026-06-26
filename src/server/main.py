@@ -29,8 +29,10 @@ def get_tests():
         }
 
 
-@app.post("/feedback", status_code=status.HTTP_204_NO_CONTENT) #HTTP_204_NO_CONTENT
+@app.post("/feedback", status_code=status.HTTP_200_OK)
 def post_feedback(feedback:str = Body(embed=True)): # embeds the feedback field into the variable, could just use the payload as a dict if wanted
     print(feedback)
     fileHandler.write_feedback(feedback)
-    return
+    return {
+        "timestamp": utility.get_time()
+        }
