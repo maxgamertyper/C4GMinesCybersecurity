@@ -8,3 +8,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+#Ignore JS files - front-end
+.DS_Store
