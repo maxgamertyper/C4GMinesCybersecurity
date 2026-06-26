@@ -15,7 +15,7 @@ def read_root():
         }
 
 @app.get("/health", status_code=status.HTTP_200_OK)
-def read_root():
+def get_health():
     return {
         "status": "ok", 
         "timestamp": utility.get_time()
@@ -23,14 +23,14 @@ def read_root():
 
 #update this as we code tests, should be a string i.e "AI analysis"
 @app.get("/tests", status_code=status.HTTP_200_OK)
-def read_root():
+def get_tests():
     return {
         "implementedTests": []
         }
 
 
 @app.post("/feedback", status_code=status.HTTP_204_NO_CONTENT) #HTTP_204_NO_CONTENT
-def read_root(feedback:str = Body(embed=True)): # embeds the feedback field into the variable, could just use the payload as a dict if wanted
+def post_feedback(feedback:str = Body(embed=True)): # embeds the feedback field into the variable, could just use the payload as a dict if wanted
     print(feedback)
     fileHandler.write_feedback(feedback)
     return
