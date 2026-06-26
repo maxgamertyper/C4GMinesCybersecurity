@@ -16,6 +16,8 @@ def test_succeed(text:str):
     print("[bold green][Success!][/bold green]: " + text)
 
 
+#I'll combine these into a more compact function tomorrow, one for get requests and one for posts
+
 def default_path_test():
     response = None
 
@@ -68,6 +70,31 @@ def health_test():
         test_information("Response: \n" + str(responseDict))
 
 
+def implemented_test():
+    response = None
+
+    try:
+        response = requests.get(BASE_SERVER_IP_ADDRESS + "/tests")
+    except requests.exceptions.ConnectionError:
+        test_alert("Server is not responding, you may need to start it with \"fastapi dev\"")
+        return
+
+    if response.status_code != 200:
+        test_alert("Tests gateway responded incorrectly")
+        return
+    
+    responseDict = response.json()
+
+    try:
+        if responseDict["implementedTests"] == None:
+            test_warning("Server didn't respond as expected in \"/tests\" path!")
+            test_information("Response: \n" + str(responseDict))
+        else:
+            test_succeed("Tests gateway responded correctly")
+    except KeyError:
+        test_alert("Missing informaiton detected in \"/tests\" path!!")
+        test_information("Response: \n" + str(responseDict))
+
 
 def feedback_test():
     TEST_FEEDBACK = "Hello, this is a feedback test"
@@ -89,4 +116,5 @@ def feedback_test():
 
 default_path_test()
 health_test()
+implemented_test()
 feedback_test()

@@ -22,7 +22,7 @@ def read_root():
         }
 
 #update this as we code tests, should be a string i.e "AI analysis"
-@app.get("/tests", status_code=status.HTTP_204_NO_CONTENT)
+@app.get("/tests", status_code=status.HTTP_200_OK)
 def read_root():
     return {
         "implementedTests": []
