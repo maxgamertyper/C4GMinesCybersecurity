@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sushi</title>
+    <link rel="stylesheet" href="bulma.min.css" />
+</head>
+<body>
+   
+    <div class="container mx-auto my-3 px-3">
+        <h1 class="title">Sushi</h1>
+        </div>
+    
+     <div class=" my-4">
+            <p class="subtitle is-6 has-text-grey mb-1 mx-auto my-3 px-3">Phishing Detector Score</p>
+            
+            <div class="is-flex is-justify-content-center is-align-items-center">
+                <span id="phishing-score" class="tag is-3 has-text-info mr-1">__</span>
+                <span class="tag is-light">/ 100</span>
+            </div>
+        </div>
+    
+     <div class="custom-dark-box p-4 my-4">
+            <p class="subtitle is-6 has-text-grey mb-2">Reasons:</p>
+            <p id="backend-analysis-text-reasons" class="has-text-white is-size-6" style="line-height: 1.5;"></p>
+        </div>
+    
+    <div class="custom-dark-box p-4 my-4">
+            <p class="subtitle is-6 has-text-success mb-2">Passed Tests:</p>
+            <p id="backend-analysis-text-passed" class="has-text-white is-size-6" style="line-height: 1.5;"></p>
+        </div>
+
+    <div class="custom-dark-box p-4 my-4">
+            <p class="subtitle is-6 has-text-danger mb-2">Failed Tests:</p>
+            <p id="backend-analysis-text-failed" class="has-text-white is-size-6" style="line-height: 1.5;"></p>
+        </div>
+
+    <div class="box has-text-centered m-3">
+            <p class="subtitle is-6 has-text-link mb-2">Does this seem accurate?</p>
+            <p id="backend-analysis-text-link" class="has-text-white is-size-6" style="line-height: 1.5;"></p>
+                <div class="is-flex is-justify-content-space-between">
+                    <button class="button is-success" style="width: 48%;">Safe</button>
+                    <button class="button is-danger" style="width: 48%;">Phishing</button>
+                        </div>
+
+        </div>
+
+
+</body>
+</html>
+
