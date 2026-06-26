@@ -1,6 +1,5 @@
 import requests
 from rich import print
-from rich.markup import escape
 from dataclasses import dataclass
 
 BASE_SERVER_IP_ADDRESS = "http://127.0.0.1:8000"
