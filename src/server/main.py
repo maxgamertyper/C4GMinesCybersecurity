@@ -14,7 +14,7 @@ def read_root():
         "environment": "production"
         }
 
-@app.get("/health")
+@app.get("/health", status_code=status.HTTP_200_OK)
 def read_root():
     return {
         "status": "ok", 
@@ -22,14 +22,14 @@ def read_root():
         }
 
 #update this as we code tests, should be a string i.e "AI analysis"
-@app.get("/tests")
+@app.get("/tests", status_code=status.HTTP_204_NO_CONTENT)
 def read_root():
     return {
         "implementedTests": []
         }
 
 
-@app.post("/feedback", status_code=status.HTTP_204_NO_CONTENT)
+@app.post("/feedback", status_code=status.HTTP_204_NO_CONTENT) #HTTP_204_NO_CONTENT
 def read_root(feedback:str = Body(embed=True)): # embeds the feedback field into the variable, could just use the payload as a dict if wanted
     print(feedback)
     fileHandler.write_feedback(feedback)
