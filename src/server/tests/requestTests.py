@@ -37,12 +37,19 @@ def default_path_test():
 def feedback_test():
     TEST_FEEDBACK = "Hello, this is a feedback test"
 
-    response = requests.post(BASE_SERVER_IP_ADDRESS + "/feedback",json={"feedback":TEST_FEEDBACK})
+    response = None
+
+    try:
+        response = requests.post(BASE_SERVER_IP_ADDRESS + "/feedback",json={"feedback":TEST_FEEDBACK})
+    except requests.exceptions.ConnectionError:
+        test_alert("Server is not responding, you may need to start it with \"fastapi dev\"")
+        return
 
     if response.status_code != 204:
-        test_alert("Feedback gateway unresponsive")
+        test_alert("Feedback gateway responded incorrectly")
     else: 
         test_succeed("Feedback gateway responded correctly")
 
 
 default_path_test()
+feedback_test()

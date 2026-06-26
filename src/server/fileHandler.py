@@ -8,7 +8,7 @@ FEEDBACK_FILE_PATH = os.path.join(CURRENT_DIR, "feedback.txt")
 def write_feedback(feedback:str):
 
     with open(FEEDBACK_FILE_PATH,"a+") as feedbackFile:
-        feedbackFile.write(utility.get_time() + "\n" + feedback)
+        feedbackFile.write(utility.get_time() + "\n" + feedback + "\n\n")
 
         feedbackFile.close()
     
