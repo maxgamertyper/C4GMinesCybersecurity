@@ -1,1 +1,13 @@
+# Ignore VS Code configuration directory
+.vscode/
+
+# big scary environment and secret tokens
+.env
+
+# Ignore generated pycache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+#Ignore JS files - front-end
 .DS_Store
