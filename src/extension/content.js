@@ -8,7 +8,7 @@
   const color = TEST_SCORE > 75 ? "#d93025" : TEST_SCORE >= 40 ? "#f2994a" : "#188038";
 
   const panelMarkup = `
-    <div class="box sushi-panel-card custom-dark-box">
+    <div class="box sushi-panel-card custom-dark-box" style="padding: 14px !important;">
       <div class="container my-3 px-3">
         <h1 class="title has-text-white">Sushi</h1>
       </div>
@@ -28,19 +28,19 @@
       </div>
 
       <div class="custom-dark-box p-4 my-4">
-        <p class="is-size-6 has-text-success mb-2">Passed Tests:</p>
+        <p class="is-size-6 mb-2" style="color: #48c78e !important;">Passed Tests:</p>
         <ul class="ml-4">
         </ul>
       </div>
 
       <div class="custom-dark-box p-4 my-4">
-        <p class="is-size-6 has-text-danger mb-2">Failed Tests:</p>
+        <p class="is-size-6 mb-2" style="color: #f14668 !important;">Failed Tests:</p>
         <ul class="ml-4">
         </ul>
       </div>
 
       <div class="box has-text-centered m-3">
-        <p class="is-size-6 has-text-link mb-3">Does this seem accurate?</p>
+        <p class="is-size-6 mb-3" style="color: #485fc7 !important;">Does this seem accurate?</p>
         <div class="is-flex is-justify-content-space-between">
          <button id="yes" class="button is-success" style="width: 48%;">Safe</button>
          <button id="no" class="button is-danger" style="width: 48%;">Phishing</button>
