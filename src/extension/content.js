@@ -115,7 +115,13 @@
       border-color: transparent;
     }
   `;
-
+  function scrapeEmailContent() {
+    const senderName= document.querySelector (".gD")?.textContent?.trim() || "";
+    const senderEmail = document.querySelector(".gD")?.getAttribute("email") || "";
+    const subject = document.querySelector(".hP")?.textContent?.trim() || "";
+    const body = document.querySelector(".a3s")?.textContent?.trim() || "";
+    return { senderName, senderEmail, subject, body };
+  }
   const injectBulma = () => {
     if (document.getElementById("sushi-bulma-styles")) return;
     const link = document.createElement("link");
@@ -162,9 +168,9 @@
     panel.innerHTML = panelMarkup;
     document.body.appendChild(panel);
 
-    panel.querySelector(".sushi-panel-close").addEventListener("click", () => {
-      panel.remove();
-    });
+    //panel.querySelector(".sushi-panel-close").addEventListener("click", () => {
+      //panel.remove();
+    //});
   };
 
   const refreshPanelIfNeeded = () => {
@@ -180,6 +186,8 @@
     const messageKey = getMessageKey();
     if (messageKey && messageKey !== lastMessageKey) {
       lastMessageKey = messageKey;
+      const emailData = scrapeEmailContent();
+      console.log(emailData);
       showPanel();
     }
   };
