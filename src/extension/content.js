@@ -46,6 +46,10 @@
          <button id="no" class="button is-danger" style="width: 48%;">Phishing</button>
         </div>
       </div>
+      <div class="is-flex is-justify-content-space-between is-align-items-center p-3">
+        <h1 class="title has-text-white m-0">Sushi</h1>
+            <button class="delete sushi-panel-close" aria-label="Close"></button>
+      </div>
     </div>
   `;
 
@@ -168,9 +172,9 @@
     panel.innerHTML = panelMarkup;
     document.body.appendChild(panel);
 
-    //panel.querySelector(".sushi-panel-close").addEventListener("click", () => {
-      //panel.remove();
-    //});
+    panel.querySelector(".sushi-panel-close").addEventListener("click", () => {
+      panel.remove();
+    });
   };
 
   const refreshPanelIfNeeded = () => {
