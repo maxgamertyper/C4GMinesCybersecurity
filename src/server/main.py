@@ -15,8 +15,8 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
-# To start the server run "fastapi dev ./src/server/main.py" if in the full repository, otherwise just "fastapi dev"
-@app.get("/", status_code=status.HTTP_200_OK)
+# To start the server run "fastapi dev ./src/server/main.py"
+@app.get("/")
 def read_root():
     return {
         "sourceURL": "https://github.com/maxgamertyper/C4GMinesCybersecurity/tree/main",
@@ -24,7 +24,7 @@ def read_root():
         "environment": "production"
         }
 
-@app.get("/health", status_code=status.HTTP_200_OK)
+@app.get("/health")
 def get_health():
     return {
         "status": "ok", 
@@ -32,7 +32,7 @@ def get_health():
         }
 
 #update this as we code tests, should be a string i.e "AI analysis"
-@app.get("/tests", status_code=status.HTTP_200_OK)
+@app.get("/tests")
 def get_tests():
     return {
         "implementedTests": []
