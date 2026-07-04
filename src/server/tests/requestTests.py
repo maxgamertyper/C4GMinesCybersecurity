@@ -63,7 +63,8 @@ MASTER_ROUTE_TEST.append(healthEndpoint)
 
 # /feedback endpoint
 expectedFeedbackPayload = {
-    "timestamp": None
+    "timestamp": None,
+    "status": "received"
 }
 feedbackEndpoint = RouteTestRecord(
     routeAddress = "/feedback",
@@ -75,7 +76,32 @@ feedbackEndpoint = RouteTestRecord(
     )
 MASTER_ROUTE_TEST.append(feedbackEndpoint)
 
-
+# /analyze endpoint
+expectedanalyzePayload = {
+    "score": None,
+    "threatLevel": None,
+    "reason": None,
+    "passedTests": None,
+    "failedTests": None,
+    "receivedEmail": None,
+    "timestamp": None,
+    "serverVersion": None
+}
+analyzeEndpoint = RouteTestRecord(
+    routeAddress = "/analyze",
+    responsePayload = expectedanalyzePayload,
+    statusCode = 200,
+    routeName = "Analyze",
+    isGET = False,
+    postPayload = {
+        "body":"Hello, this is an accuracy placeholder body",
+        "sender": "sender@placeholder.com",
+        "subject": "Placeholder Subject",
+        "accuracy": True,
+        "attachments": ["hi.exe","suspicious.xlsx"]
+        }
+    )
+MASTER_ROUTE_TEST.append(analyzeEndpoint)
 
 
 # the differnt print statements for tests
