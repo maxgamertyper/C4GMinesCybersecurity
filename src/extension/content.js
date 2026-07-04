@@ -46,6 +46,10 @@
          <button id="no" class="button is-danger" style="width: 48%;">Phishing</button>
         </div>
       </div>
+      <div class="is-flex is-justify-content-space-between is-align-items-center p-3">
+        <h1 class="title has-text-white m-0">Sushi</h1>
+            <button class="delete sushi-panel-close" aria-label="Close"></button>
+      </div>
     </div>
   `;
 
@@ -115,7 +119,13 @@
       border-color: transparent;
     }
   `;
-
+  function scrapeEmailContent() {
+    const senderName= document.querySelector (".gD")?.textContent?.trim() || "";
+    const senderEmail = document.querySelector(".gD")?.getAttribute("email") || "";
+    const subject = document.querySelector(".hP")?.textContent?.trim() || "";
+    const body = document.querySelector(".a3s")?.textContent?.trim() || "";
+    return { senderName, senderEmail, subject, body };
+  }
   const injectBulma = () => {
     if (document.getElementById("sushi-bulma-styles")) return;
     const link = document.createElement("link");
@@ -180,6 +190,8 @@
     const messageKey = getMessageKey();
     if (messageKey && messageKey !== lastMessageKey) {
       lastMessageKey = messageKey;
+      const emailData = scrapeEmailContent();
+      console.log(emailData);
       showPanel();
     }
   };
