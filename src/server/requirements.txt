@@ -1,1 +1,3 @@
 fastapi[standard]
+rich
+requests
