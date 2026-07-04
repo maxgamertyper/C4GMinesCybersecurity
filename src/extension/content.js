@@ -126,6 +126,17 @@
     const body = document.querySelector(".a3s")?.textContent?.trim() || "";
     return { senderName, senderEmail, subject, body };
   }
+  async function analyzeEmail(emailData) {
+    const response = await fetch("http://127.0.0.1:8000/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(emailData)
+    });
+    return await response.json();
+  }
+
   const injectBulma = () => {
     if (document.getElementById("sushi-bulma-styles")) return;
     const link = document.createElement("link");
@@ -191,7 +202,8 @@
     if (messageKey && messageKey !== lastMessageKey) {
       lastMessageKey = messageKey;
       const emailData = scrapeEmailContent();
-      console.log(emailData);
+      const analysisResult = analyzeEmail(emailData);
+      console.log(analysisResult);
       showPanel();
     }
   };
