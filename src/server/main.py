@@ -68,3 +68,14 @@ def post_feedback(feedback:str = Body(embed=True)): # embeds the feedback field 
         "status": "received",
         "timestamp": utility.get_time()
         }
+
+
+@app.post("/accuracy", status_code=status.HTTP_200_OK)
+def post_accuracy(payload: dict):
+
+    # store to database
+
+    return {
+        "timestamp": utility.get_time(),
+        "status": "received"
+        }

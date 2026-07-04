@@ -103,6 +103,42 @@ analyzeEndpoint = RouteTestRecord(
     )
 MASTER_ROUTE_TEST.append(analyzeEndpoint)
 
+# /accuracy
+expectedAccuracyPayload = {
+    "timestamp": None,
+    "status": "received"
+}
+accuracyEndpoint = RouteTestRecord(
+    routeAddress = "/accuracy",
+    responsePayload = expectedAccuracyPayload,
+    statusCode = 200,
+    routeName = "Accuracy",
+    isGET = False,
+    postPayload = {
+        "body":"Hello, this is an accuracy placeholder body",
+        "sender": "sender@placeholder.com",
+        "subject": "Placeholder Subject",
+        "accuracy": True, # pressed yes on the extension
+        "attachments": ["hi.exe","suspicious.xlsx"],
+        "analysisReturn": {
+            "score": 50,
+            "threatLevel": "likely phishing",
+            "reason": "This is a placeholder.",
+            "passedTests": [],
+            "failedTests": [
+                {
+                    "testName": "placeholder_test",
+                    "testScore": 50,
+                    "testWeight": 1,
+                    "testPassed": False,
+                    "testDetails": "Placeholder"
+                }
+                ],
+            }
+        }
+    )
+MASTER_ROUTE_TEST.append(accuracyEndpoint)
+
 
 # the differnt print statements for tests
 # the \\ is an escape sequence so the Rich library doesn't treat it as mark up and instead just a normal string
