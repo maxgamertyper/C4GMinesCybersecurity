@@ -63,7 +63,8 @@ MASTER_ROUTE_TEST.append(healthEndpoint)
 
 # /feedback endpoint
 expectedFeedbackPayload = {
-    "timestamp": None
+    "timestamp": None,
+    "status": "received"
 }
 feedbackEndpoint = RouteTestRecord(
     routeAddress = "/feedback",
@@ -80,6 +81,7 @@ expectedAccuracyPayload = {
     "timestamp": None,
     "status": "received"
 }
+
 accuracyEndpoint = RouteTestRecord(
     routeAddress = "/accuracy",
     responsePayload = expectedAccuracyPayload,
@@ -110,6 +112,33 @@ accuracyEndpoint = RouteTestRecord(
         }
     )
 MASTER_ROUTE_TEST.append(accuracyEndpoint)
+
+# /analyze endpoint
+expectedanalyzePayload = {
+    "score": None,
+    "threatLevel": None,
+    "reason": None,
+    "passedTests": None,
+    "failedTests": None,
+    "receivedEmail": None,
+    "timestamp": None,
+    "serverVersion": None
+}
+analyzeEndpoint = RouteTestRecord(
+    routeAddress = "/analyze",
+    responsePayload = expectedanalyzePayload,
+    statusCode = 200,
+    routeName = "Analyze",
+    isGET = False,
+    postPayload = {
+        "body":"Hello, this is an accuracy placeholder body",
+        "sender": "sender@placeholder.com",
+        "subject": "Placeholder Subject",
+        "accuracy": True,
+        "attachments": ["hi.exe","suspicious.xlsx"]
+        }
+    )
+MASTER_ROUTE_TEST.append(analyzeEndpoint)
 
 
 # the differnt print statements for tests
@@ -173,6 +202,7 @@ def route_test(routeTestInformation: RouteTestRecord):
     #if the response has more keys, it has another body answer
     if len(responseDict.keys()) > len(expectedPayload.keys()):
         test_warning("Responded with extra information", cleanName)
+        test_information("Recieved: " + str(responseDict))
 
     # check for key matches in the response and record
     for key in expectedPayload.keys():
