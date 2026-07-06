@@ -1,7 +1,6 @@
 from fastapi import FastAPI, status, Body
 from fastapi.middleware.cors import CORSMiddleware
-from server import utility
-from server import fileHandler
+from server import utility, fileHandler, TestManager
 
 app = FastAPI()
 VERSION = "0.0.1"
@@ -44,7 +43,7 @@ def post_analyze(email: dict) :
     return {
         "score": 50,
         "threatLevel": "likely phishing",
-        "reason": "This is a placeholder.",
+        "reasons": ["This is a placeholder"],
         "passedTests": [],
         "failedTests": [
             {
@@ -55,7 +54,6 @@ def post_analyze(email: dict) :
                 "testDetails": "Placeholder"
             }
         ],
-        "receivedEmail": email,
         "timestamp": utility.get_time(),
         "serverVersion": VERSION
     }

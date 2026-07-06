@@ -80,7 +80,7 @@ MASTER_ROUTE_TEST.append(feedbackEndpoint)
 expectedanalyzePayload = {
     "score": None,
     "threatLevel": None,
-    "reason": None,
+    "reasons": None,
     "passedTests": None,
     "failedTests": None,
     "receivedEmail": None,
@@ -97,7 +97,8 @@ analyzeEndpoint = RouteTestRecord(
         "body":"Hello, this is an accuracy placeholder body",
         "sender": "sender@placeholder.com",
         "subject": "Placeholder Subject",
-        "attachments": ["hi.exe","suspicious.xlsx"]
+        "attachments": ["hi.exe","suspicious.xlsx"],
+        "links": ["https://amaz0n.com","https://amazon.login.secure.dioudg98745.ru"]
         }
     )
 MASTER_ROUTE_TEST.append(analyzeEndpoint)
