@@ -40,6 +40,7 @@ def get_tests():
 # Temporary endpoint for frontend/backend testing. It receives email data from the Chrome extension and returns a placeholder
 @app.post("/analyze", status_code=status.HTTP_200_OK)
 def post_analyze(email: dict) :
+    #TestManager.run_tests() ONCE FINISHED
     return {
         "score": 50,
         "threatLevel": "likely phishing",
