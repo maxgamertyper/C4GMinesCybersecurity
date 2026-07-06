@@ -249,10 +249,19 @@ const styles = `
     panel.innerHTML = panelMarkup;
     document.body.appendChild(panel);
 
-    panel.querySelector(".sushi-panel-close").addEventListener("click", () => {
+   const closeBtn = panel.querySelector(".sushi-close");
+
+if (closeBtn) {
+  closeBtn.addEventListener("click", () => {
+    panel.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+    panel.style.opacity = "0";
+    panel.style.transform = "scale(0.95)";
+
+    setTimeout(() => {
       panel.remove();
-    });
-  };
+    }, 200);
+  })
+    }};
 
   const refreshPanelIfNeeded = () => {
     if (!isEmailOpen()) {
