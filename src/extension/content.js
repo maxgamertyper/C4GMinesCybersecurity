@@ -8,124 +8,201 @@
   const color = TEST_SCORE > 75 ? "#d93025" : TEST_SCORE >= 40 ? "#f2994a" : "#188038";
 
   const panelMarkup = `
-    <div class="box sushi-panel-card custom-dark-box" style="padding: 14px !important;">
-      <div class="container my-3 px-3">
-        <h1 class="title has-text-white">Sushi</h1>
-      </div>
+  <div class="sushi-header">
+    <div class="sushi-title">Sushi</div>
+    <button class="sushi-close" aria-label="Close">✕</button>
+  </div>
 
-      <div class="mx-auto">
-        <p class="is-size-5 has-text-grey-light m-3">Phishing Detector Score</p>
-        <div class="has-text-centered">
-          <span class="tag is-small has-text-info">${TEST_SCORE}</span>
-          <span class="tag is-dark has-text-white">/ 100</span>
-        </div>
-      </div>
-
-      <div class="custom-dark-box p-4 my-4">
-        <p class="is-size-6 has-text-light mb-2">Reasons:</p>
-        <ul class="ml-4">
-        </ul>
-      </div>
-
-      <div class="custom-dark-box p-4 my-4">
-        <p class="is-size-6 mb-2" style="color: #48c78e !important;">Passed Tests:</p>
-        <ul class="ml-4">
-        </ul>
-      </div>
-
-      <div class="custom-dark-box p-4 my-4">
-        <p class="is-size-6 mb-2" style="color: #f14668 !important;">Failed Tests:</p>
-        <ul class="ml-4">
-        </ul>
-      </div>
-
-      <div class="box has-text-centered m-3">
-        <p class="is-size-6 mb-3" style="color: #485fc7 !important;">Does this seem accurate?</p>
-        <div class="is-flex is-justify-content-space-between">
-         <button id="yes" class="button is-success" style="width: 48%;">Safe</button>
-         <button id="no" class="button is-danger" style="width: 48%;">Phishing</button>
-        </div>
-      </div>
-      <div class="is-flex is-justify-content-space-between is-align-items-center p-3">
-        <h1 class="title has-text-white m-0">Sushi</h1>
-            <button class="delete sushi-panel-close" aria-label="Close"></button>
-      </div>
+  <div class="sushi-score-wrap">
+    <div class="sushi-score-circle" style="border-color:${color}">
+      <span class="sushi-score">${TEST_SCORE}</span>
+      <span class="sushi-score-label">/100</span>
     </div>
-  `;
 
-  const styles = `
-    @keyframes sushiPulse {
-      0% { box-shadow: 0 0 0 0 ${color}66; }
-      70% { box-shadow: 0 0 0 16px rgba(0,0,0,0); }
-      100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
-    }
+    <div class="sushi-status">
+      ${sign} ${TEST_SCORE > 75 ? "High Risk" : TEST_SCORE >= 40 ? "Suspicious" : "Safe"}
+    </div>
+  </div>
 
-    #${PANEL_ID} {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 2147483647;
-      width: min(360px, calc(100vw - 24px));
-      font-family: Arial, sans-serif;
-      color: #f3f4f6;
-      pointer-events: auto;
-    }
+  <div class="sushi-card">
+    <div class="sushi-card-title">Reasons</div>
+    <ul class="sushi-list"></ul>
+  </div>
 
-    #${PANEL_ID} .sushi-panel-card {
-      background: #111827;
-      border: 2px solid ${color};
-      border-radius: 16px;
-      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
-      overflow: hidden;
-      animation: sushiPulse 1.4s infinite ease-in-out;
-    }
+  <div class="sushi-card">
+    <div class="sushi-card-title good">Passed Tests</div>
+    <ul class="sushi-list"></ul>
+  </div>
 
-    #${PANEL_ID} .custom-dark-box {
-      background: #111827;
-      border: 1px solid #374151;
-      border-radius: 12px;
-    }
+  <div class="sushi-card">
+    <div class="sushi-card-title bad">Failed Tests</div>
+    <ul class="sushi-list"></ul>
+  </div>
 
-    #${PANEL_ID} .box.has-text-centered {
-      background: #111827;
-      border-color: #374151;
-    }
+  <div class="sushi-footer">
+    <div class="sushi-question sushi-question-purple">
+      Does this seem accurate?
+    </div>
+    <div class="sushi-buttons">
+      <button class="sushi-btn safe">Safe</button>
+      <button class="sushi-btn danger">Phishing</button>
+    </div>
+  </div>
+`;
 
-    #${PANEL_ID} .has-text-light {
-      color: #d1d5db !important;
-    }
+const styles = `
+#${PANEL_ID} {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2147483647;
+  width: 340px;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #e5e7eb;
+}
 
-    #${PANEL_ID} .has-text-grey-light {
-      color: #9ca3af !important;
-    }
+/* MAIN CARD */
+#${PANEL_ID} {
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  overflow: hidden;
+}
 
-    #${PANEL_ID} .tag.is-dark {
-      background: #0f172a;
-      border-color: #374151;
-    }
+/* HEADER */
+.sushi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #1f2937;
+}
 
-    #${PANEL_ID} .button.is-success,
-    #${PANEL_ID} .button.is-danger {
-      min-width: 48%;
-    }
+.sushi-title {
+  font-weight: 700;
+  font-size: 16px;
+}
 
-    #${PANEL_ID} .button.is-success {
-      background: #16a34a;
-      border-color: transparent;
-    }
+.sushi-close {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 18px;
+  cursor: pointer;
+}
 
-    #${PANEL_ID} .button.is-danger {
-      background: #dc2626;
-      border-color: transparent;
-    }
-  `;
+/* SCORE */
+.sushi-score-wrap {
+  text-align: center;
+  padding: 18px;
+}
+
+.sushi-score-circle {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 3px solid;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sushi-score {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.sushi-score-label {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.sushi-status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* CARDS */
+.sushi-card {
+  margin: 10px 12px;
+  padding: 12px;
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+}
+
+.sushi-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.sushi-card-title.good { color: #22c55e; }
+.sushi-card-title.bad { color: #ef4444; }
+
+/* LIST */
+.sushi-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+/* FOOTER */
+.sushi-footer {
+  padding: 14px;
+  border-top: 1px solid #1f2937;
+}
+
+.sushi-question {
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: #9ca3af;
+}
+
+/* 🔥 ADDED: purple question text */
+.sushi-question-purple {
+  color: #3273dc !important;
+  font-weight: 600;
+}
+
+.sushi-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.sushi-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sushi-btn.safe {
+  background: #16a34a;
+  color: white;
+}
+
+.sushi-btn.danger {
+  background: #dc2626;
+  color: white;
+}
+`;
+  
   function scrapeEmailContent() {
-    const senderName= document.querySelector (".gD")?.textContent?.trim() || "";
+    const senderName = document.querySelector(".gD")?.textContent?.trim() || "";
     const senderEmail = document.querySelector(".gD")?.getAttribute("email") || "";
     const subject = document.querySelector(".hP")?.textContent?.trim() || "";
     const body = document.querySelector(".a3s")?.textContent?.trim() || "";
     return { senderName, senderEmail, subject, body };
-  }
+}
+
   const injectBulma = () => {
     if (document.getElementById("sushi-bulma-styles")) return;
     const link = document.createElement("link");
