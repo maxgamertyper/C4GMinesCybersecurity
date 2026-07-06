@@ -120,11 +120,11 @@
     }
   `;
   function scrapeEmailContent() {
-    const senderName= document.querySelector (".gD")?.textContent?.trim() || "";
-    const senderEmail = document.querySelector(".gD")?.getAttribute("email") || "";
-    const subject = document.querySelector(".hP")?.textContent?.trim() || "";
     const body = document.querySelector(".a3s")?.textContent?.trim() || "";
-    return { senderName, senderEmail, subject, body };
+    const sender = document.querySelector(".gD")?.getAttribute("email") || "";
+    const subject = document.querySelector(".hP")?.textContent?.trim() || "";
+    const links = Array.from(document.querySelectorAll(".a3s a")).map(a => a.href);
+    return { body, sender, subject, links };
   }
   async function analyzeEmail(emailData) {
     const response = await fetch("http://127.0.0.1:8000/analyze", {
@@ -202,9 +202,9 @@
     if (messageKey && messageKey !== lastMessageKey) {
       lastMessageKey = messageKey;
       const emailData = scrapeEmailContent();
-      console.log(emailData);
+      console.log("Email Data:", emailData);
       const analysisResult = analyzeEmail(emailData);
-      console.log(analysisResult);
+      console.log("Analysis Result:", analysisResult);
       showPanel();
     }
   };
