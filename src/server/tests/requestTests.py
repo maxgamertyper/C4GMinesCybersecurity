@@ -97,7 +97,6 @@ analyzeEndpoint = RouteTestRecord(
         "body":"Hello, this is an accuracy placeholder body",
         "sender": "sender@placeholder.com",
         "subject": "Placeholder Subject",
-        "accuracy": True,
         "attachments": ["hi.exe","suspicious.xlsx"]
         }
     )
