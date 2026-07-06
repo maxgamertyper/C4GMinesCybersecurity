@@ -202,6 +202,7 @@
     if (messageKey && messageKey !== lastMessageKey) {
       lastMessageKey = messageKey;
       const emailData = scrapeEmailContent();
+      console.log(emailData);
       const analysisResult = analyzeEmail(emailData);
       console.log(analysisResult);
       showPanel();
