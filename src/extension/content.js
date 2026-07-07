@@ -196,12 +196,27 @@ const styles = `
 `;
   
   function scrapeEmailContent() {
-    const senderName = document.querySelector(".gD")?.textContent?.trim() || "";
-    const senderEmail = document.querySelector(".gD")?.getAttribute("email") || "";
-    const subject = document.querySelector(".hP")?.textContent?.trim() || "";
     const body = document.querySelector(".a3s")?.textContent?.trim() || "";
-    return { senderName, senderEmail, subject, body };
+    const sender = document.querySelector(".gD")?.getAttribute("email") || "";
+    const subject = document.querySelector(".hP")?.textContent?.trim() || "";
+    const attachments = [];
+    document.querySelectorAll("span.aV3").forEach(file => {
+    attachments.push(file.textContent.trim());
+  });
+  const links = Array.from(document.querySelectorAll(".a3s a")).map(a => a.href);
+   return { body, sender, subject, attachments, links };
 }
+
+  async function analyzeEmail(emailData) {
+    const response = await fetch("http://127.0.0.1:8000/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(emailData)
+    });
+    return await response.json();
+  }
 
   const injectBulma = () => {
     if (document.getElementById("sushi-bulma-styles")) return;
@@ -249,10 +264,19 @@ const styles = `
     panel.innerHTML = panelMarkup;
     document.body.appendChild(panel);
 
-    panel.querySelector(".sushi-panel-close").addEventListener("click", () => {
+   const closeBtn = panel.querySelector(".sushi-close");
+
+if (closeBtn) {
+  closeBtn.addEventListener("click", () => {
+    panel.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+    panel.style.opacity = "0";
+    panel.style.transform = "scale(0.95)";
+
+    setTimeout(() => {
       panel.remove();
-    });
-  };
+    }, 200);
+  })
+    }};
 
   const refreshPanelIfNeeded = () => {
     if (!isEmailOpen()) {
@@ -268,7 +292,9 @@ const styles = `
     if (messageKey && messageKey !== lastMessageKey) {
       lastMessageKey = messageKey;
       const emailData = scrapeEmailContent();
-      console.log(emailData);
+      console.log("Email Data:", emailData);
+      const analysisResult = analyzeEmail(emailData);
+      console.log("Analysis Result:", analysisResult);
       showPanel();
     }
   };
