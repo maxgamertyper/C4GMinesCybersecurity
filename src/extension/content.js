@@ -199,13 +199,12 @@ const styles = `
     const body = document.querySelector(".a3s")?.textContent?.trim() || "";
     const sender = document.querySelector(".gD")?.getAttribute("email") || "";
     const subject = document.querySelector(".hP")?.textContent?.trim() || "";
-    const body = document.querySelector(".a3s")?.textContent?.trim() || "";
     const attachments = [];
     document.querySelectorAll("span.aV3").forEach(file => {
     attachments.push(file.textContent.trim());
   });
   const links = Array.from(document.querySelectorAll(".a3s a")).map(a => a.href);
-   return { senderName, senderEmail, subject, body, attachments, links };
+   return { body, sender, subject, attachments, links };
 }
 
   async function analyzeEmail(emailData) {
