@@ -196,16 +196,28 @@ const styles = `
 `;
   
   function scrapeEmailContent() {
-    const senderName = document.querySelector(".gD")?.textContent?.trim() || "";
-    const senderEmail = document.querySelector(".gD")?.getAttribute("email") || "";
+    const body = document.querySelector(".a3s")?.textContent?.trim() || "";
+    const sender = document.querySelector(".gD")?.getAttribute("email") || "";
     const subject = document.querySelector(".hP")?.textContent?.trim() || "";
     const body = document.querySelector(".a3s")?.textContent?.trim() || "";
     const attachments = [];
     document.querySelectorAll("span.aV3").forEach(file => {
     attachments.push(file.textContent.trim());
   });
-   return { senderName, senderEmail, subject, body, attachments };
+  const links = Array.from(document.querySelectorAll(".a3s a")).map(a => a.href);
+   return { senderName, senderEmail, subject, body, attachments, links };
 }
+
+  async function analyzeEmail(emailData) {
+    const response = await fetch("http://127.0.0.1:8000/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(emailData)
+    });
+    return await response.json();
+  }
 
   const injectBulma = () => {
     if (document.getElementById("sushi-bulma-styles")) return;
@@ -281,7 +293,9 @@ if (closeBtn) {
     if (messageKey && messageKey !== lastMessageKey) {
       lastMessageKey = messageKey;
       const emailData = scrapeEmailContent();
-      console.log(emailData);
+      console.log("Email Data:", emailData);
+      const analysisResult = analyzeEmail(emailData);
+      console.log("Analysis Result:", analysisResult);
       showPanel();
     }
   };
