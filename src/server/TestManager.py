@@ -1,5 +1,7 @@
 from server import ai
 import os
+from collections import Counter
+import math
 
 """
 {
@@ -11,11 +13,9 @@ import os
 }
 
 Needed:
-
 Domain tests (apply to the sender and any links in the body)
 Site Age
 Site Similarity
-Domain Entropy
 Database Search
 Subdomains
 Redirect count
@@ -37,6 +37,9 @@ def return_creator(test_results: dict):
 def run_tests(payload: dict):
 
     AIanalysis = ai.request_ai_analysis(payload["subject"], payload["body"], payload["attachments"])
+    extensionAnalysis = file_extension_check(payload["attachments"])
+    
+
     #TODO: domain analysis, 
 
 
@@ -93,3 +96,17 @@ def file_extension_check(attachments: list[str]):
                 }
 
     return highest_risk_result
+
+def domain_entropy_analysis(domain: str):
+    if not domain: #if its empty
+        return 0.0
+    
+    frequencies = Counter(domain)
+    total_chars = len(domain)
+
+    entropy = 0.0
+    for count in frequencies.values():
+        probability = count / total_chars
+        entropy -= probability * math.log2(probability)
+
+    return round(entropy, 2)
