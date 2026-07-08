@@ -135,7 +135,7 @@ def subdomain_score(domain: str):
     
     count = len(ext.subdomain.split('.'))
     
-    if len(count)>4: # 5 or more subdomains
+    if count>4: # 5 or more subdomains
         return 0
         
     return scoreMap[count]
@@ -155,7 +155,7 @@ def domain_age_analysis(domain:str):
             creation_date = creation_date[0]
         
         today = datetime.now()
-        ageDays = today - creation_date
+        ageDays = (today - creation_date).days
         
         if ageDays<4:
             return 15

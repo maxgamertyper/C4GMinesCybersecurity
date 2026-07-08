@@ -4,3 +4,6 @@ requests
 tldextract
 whois
 fake-useragent
+openai
+python-dotenv
+pydantic
