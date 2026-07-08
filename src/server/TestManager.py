@@ -5,7 +5,10 @@ import math
 import tldextract
 import whois
 from datetime import datetime
+from fake_useragent import UserAgent
+import requests
 
+ua = UserAgent()
 """
 {
 "body":"Hello, this is an accuracy placeholder body",
@@ -17,10 +20,8 @@ from datetime import datetime
 
 Needed:
 Domain tests (apply to the sender and any links in the body)
-Site Age
 Site Similarity
 Database Search
-Redirect count
 
 
 {
@@ -100,7 +101,6 @@ def file_extension_check(attachments: list[str]):
     return highest_risk_result
 
 def domain_entropy_analysis(domain: str):
-    scoreMap = 
     if not domain: #if its empty
         return 0.0
     
@@ -112,8 +112,16 @@ def domain_entropy_analysis(domain: str):
         probability = count / total_chars
         entropy -= probability * math.log2(probability)
 
-    return round(entropy, 2)
+    entropy = round(entropy, 2)
 
+    if entropy<3.5:
+        return 0 # relatively normal domain entropy like google or amazon
+    elif entropy<4.5:
+        return 35 # could be a more random domain or a corporate domain
+    else:
+        return 90 # very likely to be phishing
+
+    return 
 
 def subdomain_score(domain: str):
     scoreMap = {0: 100, 1: 100, 2: 85, 3: 60, 4: 15}
@@ -133,18 +141,15 @@ def subdomain_score(domain: str):
     return scoreMap[count]
 
 def domain_age_analysis(domain:str):
-    scoreMap = {3: 90, 2: 45, 1: 15, 0: 0}
-    ageScore = 0 #3 is very likley safe (90), 2 is not sure (45), 1 is likely phishing (15), 0 is unregistered (0)
-
     if not domain:
-        ageScore = 3
+        return 100
     
     try:
         w = whois.whois(domain)
         creation_date = w.creation_date
 
         if not creation_date:
-            age_score = 0
+            return 0
 
         if isinstance(creation_date, list):
             creation_date = creation_date[0]
@@ -153,13 +158,60 @@ def domain_age_analysis(domain:str):
         ageDays = today - creation_date
         
         if ageDays<4:
-            ageScore = 1
-        elif ageScore<90:
-            ageScore = 2
+            return 15
+        elif ageDays<90:
+            return 40
         else:
-            ageScore = 3
+            return 85
 
 
     except Exception:
-        ageScore = 0
-    
+        return 100
+
+def redirect_analysis(initial_url: str):
+    header ={
+        "User-Agent": ua.random
+    }
+    visited_urls = set()
+    current_url = initial_url.lower().strip()
+    redirect_count = 0
+
+    try:
+        with requests.Session() as session:
+
+            while redirect_count < 8:
+                session.headers.update(header)
+
+                if current_url in visited_urls:
+                    return {
+                        "is_loop": True,
+                        "redirects": redirect_count,
+                        "details": ""
+                    }
+
+                visited_urls.add(current_url)
+
+                response = requests.get(current_url, headers=header, allow_redirects=False, timeout=3)
+
+                if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response.headers:
+                    current_url = response.headers['Location'].lower().strip()
+                    redirect_count += 1
+                else: # no more redirects
+                    return {
+                        "is_loop": False,
+                        "redirects": redirect_count,
+                        "details": ""
+                    }
+                
+            return {
+                        "is_loop": False,
+                        "redirects": redirect_count,
+                        "details": "Max redirect count reached"
+                    }
+    except requests.RequestException:
+        return {
+                "is_loop": None,
+                "redirects": redirect_count,
+                "details": "Network request failed."
+            }
+
