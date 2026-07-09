@@ -48,6 +48,8 @@ def run_tests(payload: dict):
 
     links = [get_email_domain(payload.get("sender","")), *payload.get("links",[])]
 
+    worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score = {"testScore":-1} # make it so that it will be overriden
+
     for link in links:
         domain = sanitize_link(link)
         age_score = domain_age_analysis(domain)
@@ -55,6 +57,16 @@ def run_tests(payload: dict):
         entropy_score = domain_entropy_analysis(domain)
         redirect_score = redirect_interpreter(link)
 
+        if age_score["testScore"] > worst_age_score:
+            worst_age_score = age_score
+        if subdomain_score["testScore"] > worst_subdomain_score:
+            worst_subdomain_score = subdomain_score
+        if entropy_score["testScore"] > worst_entropy_score:
+            worst_entropy_score = entropy_score
+        if redirect_score["testScore"] > worst_redirect_score:
+            worst_redirect_score = redirect_score
+
+    
 
 
     #TODO: domain analysis, 
