@@ -51,7 +51,7 @@ def ai_test():
             Is Phishing: {str(safeAnalysis.is_phishing)}
             Confidence: {str(safeAnalysis.confidence)}
             Suspicion Score: {str(safeAnalysis.suspicionScore)}
-            Reasoning: {safeAnalysis.phishingReasons}
+            Reasoning: {safeAnalysis.phishingReason}
         """)
     else:
         test_succeed("", "AI deemed the safe email safe")
@@ -64,7 +64,7 @@ def ai_test():
             Is Phishing: {str(evilAnalysis.is_phishing)}
             Confidence: {str(evilAnalysis.confidence)}
             Suspicion Score: {str(evilAnalysis.suspicionScore)}
-            Reasoning: {safeAnalysis.phishingReasons}
+            Reasoning: {safeAnalysis.phishingReason}
         """)
     else:
         test_succeed("", "AI deemed the evil email evil")
