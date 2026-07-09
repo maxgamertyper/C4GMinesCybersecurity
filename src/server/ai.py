@@ -18,7 +18,7 @@ client = OpenAI(
 
 class PhishingAnalysis(BaseModel):
     is_phishing: bool = Field(description="True if the email is a likely phishing attempt, False if the email is safe.")
-    phishingReasons: list[str] = Field(description="A brief, seperated explanation of why this conclusion was reached. ")
+    phishingReason: str = Field(description="A brief, yet thorough explanation of why this conclusion was reached.")
     suspicionScore: int = Field(description="A score from 0 to 100 on the suspicion level of this email. 0 being safe and 100 being extremly likely phishing")
     confidence: int = Field(description="A confidence rating from 0 to 100. If the email is clearly safe and has no threats, confidence should be near 100 because you are certain it is safe.")
 
