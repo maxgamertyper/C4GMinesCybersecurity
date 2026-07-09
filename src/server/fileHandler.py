@@ -203,3 +203,12 @@ def upload_suspicious_actor(conn, cursor, actorName, actorType, actorScore):
     cursor.execute(update_query,update_payload)
 
     conn.commit()
+
+def lookup_suspicious_actor(conn, cursor, actorName, actorType):
+    cursor.execute("SELECT suspicionLevel FROM suspicious_actors WHERE (actorName, actorType) = (?, ?)", (actorName, actorType))
+    result = cursor.fetchone()
+
+    if not result:
+        return 0
+    else:
+        return result[0]
