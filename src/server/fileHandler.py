@@ -195,7 +195,7 @@ def upload_suspicious_actor(conn, cursor, actorName, actorType, actorScore):
     WHERE actorID = ?
     """
     current_score = result[1] if result[1] is not None else 50 # safety
-    new_average_score = (current_score + actorScore) / 2 # more weight for recent events as opposed to a true average
+    new_average_score = round((current_score + actorScore) / 2) # more weight for recent events as opposed to a true average
     update_payload = (
         new_average_score,
         result[0]
