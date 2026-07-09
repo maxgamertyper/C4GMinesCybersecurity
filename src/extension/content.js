@@ -36,13 +36,14 @@
     <ul id="sushi-failed" class="sushi-list"></ul>
   </div>
 
-  <div class="sushi-footer">
+  <div class="sushi-footer" id="feedback-section">
     <div class="sushi-question sushi-question-purple">
       Does this seem accurate?
     </div>
+
     <div class="sushi-buttons">
-      <button class="sushi-btn safe">Safe</button>
-      <button class="sushi-btn danger">Phishing</button>
+      <button id="safe-btn" class="sushi-btn safe">Safe</button>
+      <button id="phishing-btn" class="sushi-btn danger">Phishing</button>
     </div>
   </div>
 `;
@@ -190,6 +191,17 @@ const styles = `
   background: #dc2626;
   color: white;
 }
+
+.sushi-feedback {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  color: #ffffffff;
+  font-weight: 600;
+}
+
 `;
   
   function scrapeEmailContent() {
@@ -213,6 +225,26 @@ const styles = `
         body: JSON.stringify(emailData)
     });
     return await response.json();
+  }
+
+  async function sendFeedback(feedback) {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/accuracy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          feedback: feedback
+        })
+      });
+
+      const data = await response.json();
+      console.log("Feedback sent:", data);
+
+    } catch (error) {
+      console.error("Error sending feedback:", error);
+    }
   }
 
   const injectBulma = () => {
@@ -260,6 +292,29 @@ const styles = `
     panel.id = PANEL_ID;
     panel.innerHTML = panelMarkup;
     document.body.appendChild(panel);
+
+    const safeBtn = panel.querySelector("#safe-btn");
+    const phishingBtn = panel.querySelector("#phishing-btn");
+    const feedbackSection = panel.querySelector("#feedback-section");
+
+    function showThankYou() {
+      feedbackSection.innerHTML = `
+        <div class="sushi-feedback">
+          Feedback received.<br>
+          Thank you!
+        </div>
+      `;
+}
+
+    safeBtn.addEventListener("click", () => {
+      sendFeedback("safe");
+      showThankYou();
+    });
+
+    phishingBtn.addEventListener("click", () => {
+      sendFeedback("phishing");
+      showThankYou();
+    });
 
    const closeBtn = panel.querySelector(".sushi-close");
 
@@ -350,4 +405,6 @@ if (closeBtn) {
 
   window.addEventListener("hashchange", scheduleRefresh);
   window.addEventListener("popstate", scheduleRefresh);
+
 })();
+
