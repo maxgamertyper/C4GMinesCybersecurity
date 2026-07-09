@@ -1,9 +1,8 @@
 from server import utility
-from server.main import VERSION
+from server.utility import VERSION, CURRENT_DIR
 import os
 
 # change directory to the same as the file
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FEEDBACK_FILE_PATH = os.path.join(CURRENT_DIR, "feedback.txt")
 
 
@@ -27,7 +26,7 @@ def create_if_nonesxistent(conn, cursor):
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS suspicious_actors (
         actorID INTEGER PRIMARY KEY AUTOINCREMENT,
-        actorName TEXT UNIQUE,
+        actorName TEXT UNIQUE, 
         actorTYPE TEXT,
         suspicionLevel INTEGER,
         firstSeen DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -35,7 +34,7 @@ def create_if_nonesxistent(conn, cursor):
         occurrences INTEGER,
         manualConfirmation BOOLEAN
     )
-    """)
+    """) # actor name will either be an email or a link
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS emails_table (
         emailID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +51,7 @@ def create_if_nonesxistent(conn, cursor):
         attachmentName TEXT,
         attachmentExtension TEXT,
         
-        FOREIGN KEY (emailID) REFERENCES emails_table(emailID)
+        FOREIGN KEY (emailID) REFERENCES emails_table(emailID) ON DELETE CASCADE
     )
     """)
     cursor.execute("""
@@ -66,7 +65,7 @@ def create_if_nonesxistent(conn, cursor):
         phishingType TEXT,
         reason TEXT,
         
-        FOREIGN KEY (emailID) REFERENCES emails_table(emailID)
+        FOREIGN KEY (emailID) REFERENCES emails_table(emailID) ON DELETE CASCADE
     )
     """)
     cursor.execute("""
@@ -78,7 +77,7 @@ def create_if_nonesxistent(conn, cursor):
         testName TEXT,
         testPassed BOOLEAN,
         
-        FOREIGN KEY (submissionID) REFERENCES analysis_feedback(submissionID)
+        FOREIGN KEY (submissionID) REFERENCES analysis_feedback(submissionID) ON DELETE CASCADE
     )
     """)
 
@@ -169,6 +168,38 @@ def process_accuracy(conn, cursor, payload: dict):
 
     conn.commit()
 
-def upload_suspicious_actor(conn, cursor, actorName, actorScore):
+def upload_suspicious_actor(conn, cursor, actorName, actorType, actorScore):
     #check for existence
+    cursor.execute("SELECT actorID, suspicionLevel FROM suspicious_actors WHERE (actorName, actorType) = (?, ?)", (actorName, actorType))
+    result = cursor.fetchone()
 
+    if not result: # doesnt exist yet
+        insert_query = """
+            INSERT INTO suspicious_actors (actorName, actorType, suspicionLevel, occurrences, manualConfirmation)
+            VALUES (?, ?, ?, ?, ?)
+        """
+        insert_payload = (
+            actorName,
+            actorType,
+            actorScore,
+            1,
+            False
+        )
+        cursor.execute(insert_query,insert_payload)
+        conn.commit()
+        return
+    
+    update_query = """
+    UPDATE suspicious_actors
+    SET occurrences = occurrences + 1, suspicionLevel = ?
+    WHERE actorID = ?
+    """
+    current_score = result[1] if result[1] is not None else 50 # safety
+    new_average_score = (current_score + actorScore) / 2 # more weight for recent events as opposed to a true average
+    update_payload = (
+        new_average_score,
+        result[0]
+    )
+    cursor.execute(update_query,update_payload)
+
+    conn.commit()

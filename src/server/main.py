@@ -1,15 +1,9 @@
 from fastapi import FastAPI, status, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
-from server import utility, fileHandler
+from server import fileHandler, utility
+from server.utility import VERSION, DATABASE_FILE_PATH
 from contextlib import asynccontextmanager
-import os
 import sqlite3
-
-
-VERSION = "0.0.1"
-
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE_FILE_PATH = os.path.join(CURRENT_DIR, "sushiSQL.db")
 
 @asynccontextmanager
 async def server_wrapper(app: FastAPI):
