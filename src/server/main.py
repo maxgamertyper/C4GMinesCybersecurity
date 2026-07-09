@@ -96,29 +96,11 @@ def post_feedback(feedback:str = Body(embed=True)): # embeds the feedback field 
 @app.post("/accuracy", status_code=status.HTTP_200_OK)
 def post_accuracy(payload: dict, request: Request):
 
-    {
-        "body":"Hello, this is an accuracy placeholder body",
-        "sender": "sender@placeholder.com",
-        "subject": "Placeholder Subject",
-        "accuracy": True, # pressed yes on the extension
-        "attachments": ["hi.exe","suspicious.xlsx"],
-        "analysisReturn": {
-            "score": 50,
-            "threatLevel": "likely phishing",
-            "reason": "This is a placeholder.",
-            "passedTests": [],
-            "failedTests": [
-                {
-                    "testName": "placeholder_test",
-                    "testScore": 50,
-                    "testWeight": 1,
-                    "testPassed": False,
-                    "testDetails": "Placeholder"
-                }
-                ],
-            }
-        }
+    cursor = request.app.state.db_cursor
+    conn = request.app.state.db_conn
+
     # store to database
+    fileHandler.process_accuracy(conn, cursor, payload)
 
     return {
         "timestamp": utility.get_time(),
