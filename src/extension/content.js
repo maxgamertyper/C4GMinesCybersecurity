@@ -1,11 +1,11 @@
 (() => {
-  const TEST_SCORE = 95;
+  let TEST_SCORE = null;
   const PANEL_ID = "sushi-gmail-panel";
   let lastMessageKey = null;
   let pendingCheck = null;
 
-  const sign = TEST_SCORE > 75 ? "🛑" : TEST_SCORE >= 40 ? "⚠️" : "✅";
-  const color = TEST_SCORE > 75 ? "#d93025" : TEST_SCORE >= 40 ? "#f2994a" : "#188038";
+  const sign = TEST_SCORE > 70 ? "🛑" : TEST_SCORE >= 40 ? "⚠️" : "✅";
+  const color = TEST_SCORE > 70 ? "#d93025" : TEST_SCORE >= 40 ? "#f2994a" : "#188038";
 
   const panelMarkup = `
   <div class="sushi-header">
@@ -15,37 +15,35 @@
 
   <div class="sushi-score-wrap">
     <div class="sushi-score-circle" style="border-color:${color}">
-      <span class="sushi-score">${TEST_SCORE}</span>
-      <span class="sushi-score-label">/100</span>
+      <span id="sushi-score" class="sushi-score">0</span>
+      <span id="sushi-score-label" class="sushi-score-label">/100</span>
     </div>
-
-    <div class="sushi-status">
-      ${sign} ${TEST_SCORE > 75 ? "High Risk" : TEST_SCORE >= 40 ? "Suspicious" : "Safe"}
+        <div id="sushi-status" class="sushi-status"></div>
     </div>
-  </div>
 
   <div class="sushi-card">
-    <div class="sushi-card-title">Reasons</div>
-    <ul class="sushi-list"></ul>
+    <div class="sushi-card-title">Reason</div>
+    <ul id="sushi-reason" class="sushi-reason"></ul>
   </div>
 
   <div class="sushi-card">
     <div class="sushi-card-title good">Passed Tests</div>
-    <ul class="sushi-list"></ul>
+    <ul id="sushi-passed" class="sushi-list"></ul>
   </div>
 
   <div class="sushi-card">
     <div class="sushi-card-title bad">Failed Tests</div>
-    <ul class="sushi-list"></ul>
+    <ul id="sushi-failed" class="sushi-list"></ul>
   </div>
 
-  <div class="sushi-footer">
+  <div class="sushi-footer" id="feedback-section">
     <div class="sushi-question sushi-question-purple">
       Does this seem accurate?
     </div>
+
     <div class="sushi-buttons">
-      <button class="sushi-btn safe">Safe</button>
-      <button class="sushi-btn danger">Phishing</button>
+      <button id="safe-btn" class="sushi-btn safe">Safe</button>
+      <button id="phishing-btn" class="sushi-btn danger">Phishing</button>
     </div>
   </div>
 `;
@@ -193,6 +191,17 @@ const styles = `
   background: #dc2626;
   color: white;
 }
+
+.sushi-feedback {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  color: #ffffffff;
+  font-weight: 600;
+}
+
 `;
   
   function scrapeEmailContent() {
@@ -216,6 +225,26 @@ const styles = `
         body: JSON.stringify(emailData)
     });
     return await response.json();
+  }
+
+  async function sendFeedback(feedback) {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/accuracy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          feedback: feedback
+        })
+      });
+
+      const data = await response.json();
+      console.log("Feedback sent:", data);
+
+    } catch (error) {
+      console.error("Error sending feedback:", error);
+    }
   }
 
   const injectBulma = () => {
@@ -264,6 +293,29 @@ const styles = `
     panel.innerHTML = panelMarkup;
     document.body.appendChild(panel);
 
+    const safeBtn = panel.querySelector("#safe-btn");
+    const phishingBtn = panel.querySelector("#phishing-btn");
+    const feedbackSection = panel.querySelector("#feedback-section");
+
+    function showThankYou() {
+      feedbackSection.innerHTML = `
+        <div class="sushi-feedback">
+          Feedback received.<br>
+          Thank you!
+        </div>
+      `;
+}
+
+    safeBtn.addEventListener("click", () => {
+      sendFeedback("safe");
+      showThankYou();
+    });
+
+    phishingBtn.addEventListener("click", () => {
+      sendFeedback("phishing");
+      showThankYou();
+    });
+
    const closeBtn = panel.querySelector(".sushi-close");
 
 if (closeBtn) {
@@ -277,8 +329,37 @@ if (closeBtn) {
     }, 200);
   })
     }};
+    const updatePanel=(data) =>{
+      document.getElementById("sushi-score").textContent = data.score;
+      document.getElementById("sushi-status").textContent = data.threatLevel;
+      document.getElementById("sushi-reason").textContent = data.reason;
+      document.getElementById("sushi-failed").innerHTML = "";
+      document.getElementById("sushi-passed").innerHTML = "";
+      const passedTests = document.getElementById("sushi-passed");
+      const failedTests = document.getElementById("sushi-failed");
+      if (data.passedTests.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No tests passed.";
+        passedTests.appendChild(li);
+      }
+      if (data.failedTests.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No tests failed.";
+        failedTests.appendChild(li);
+      }
+      data.passedTests.forEach(test => {
+        const li = document.createElement("li");
+        li.textContent = test.testName + ": " +test.testScore +"/100  " + test.Details;
+        passedTests.appendChild(li);
+      });
+      data.failedTests.forEach(test => {
+        const li = document.createElement("li");
+        li.textContent = test.testName + ": " +test.testScore +"/100  " + test.Details;
+        failedTests.appendChild(li);
+      });
+    }
 
-  const refreshPanelIfNeeded = () => {
+  const refreshPanelIfNeeded = async() => {
     if (!isEmailOpen()) {
       lastMessageKey = null;
       const existingPanel = document.getElementById(PANEL_ID);
@@ -293,9 +374,11 @@ if (closeBtn) {
       lastMessageKey = messageKey;
       const emailData = scrapeEmailContent();
       console.log("Email Data:", emailData);
-      const analysisResult = analyzeEmail(emailData);
+      const analysisResult = await analyzeEmail(emailData);
       console.log("Analysis Result:", analysisResult);
+      console.log("Score:", analysisResult.score);
       showPanel();
+      updatePanel(analysisResult);
     }
   };
 
@@ -322,4 +405,6 @@ if (closeBtn) {
 
   window.addEventListener("hashchange", scheduleRefresh);
   window.addEventListener("popstate", scheduleRefresh);
+
 })();
+
