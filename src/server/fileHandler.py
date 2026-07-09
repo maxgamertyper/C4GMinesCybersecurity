@@ -27,7 +27,7 @@ def create_if_nonesxistent(conn, cursor):
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS suspicious_actors (
         actorID INTEGER PRIMARY KEY AUTOINCREMENT,
-        actorName TEXT,
+        actorName TEXT UNIQUE,
         actorTYPE TEXT,
         suspicionLevel INTEGER,
         firstSeen DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -125,19 +125,19 @@ def process_accuracy(conn, cursor, payload: dict):
         )
         cursor.execute(attachments_query,attachments_payload)
 
-    analysis_payload = payload.get("analysisReturn")
+    analysis_payload_request = payload.get("analysisReturn",{})
 
     analysis_query = """
         INSERT INTO analysis_feedback (emailID, userAccuracyResponse, serverVersion, phishingScore, phishingType, reason)
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
     """
     analysis_payload = (
         new_email_id,
         payload.get("accuracy",False),
         VERSION,
-        analysis_payload.get("score"),
-        analysis_payload.get("threatLevel"),
-        analysis_payload.get("reason")
+        analysis_payload_request.get("score"),
+        analysis_payload_request.get("threatLevel"),
+        analysis_payload_request.get("reason")
     )
     cursor.execute(analysis_query,analysis_payload)
 
@@ -147,31 +147,28 @@ def process_accuracy(conn, cursor, payload: dict):
         INSERT INTO tests_table (submissionID, testScore, testWeight, testName, testPassed)
         VALUES (?, ?, ?, ?, ?)
     """
-    for test in analysis_payload.get("passedTests",[]):
+    for test in analysis_payload_request.get("passedTests",[]):
         test_payload = (
             new_submission_id,
             test.get("testScore"),
             test.get("testWeight"),
-            test.get("testScore"),
+            test.get("testName"),
             True
         )
-    submissionID INTEGER,
-        testScore INTEGER,
-        testWeight INTEGER,
-        testName TEXT,
-        testSuccessful BOOLEAN,
+        cursor.execute(test_query,test_payload)
 
-    {
-        "analysisReturn": {
-            "passedTests": [],
-            "failedTests": [
-                {
-                    "testName": "placeholder_test",
-                    "testScore": 50,
-                    "testWeight": 1,
-                    "testPassed": False,
-                    "testDetails": "Placeholder"
-                }
-                ],
-            }
-        }
+    for test in analysis_payload_request.get("failedTests",[]):
+        test_payload = (
+            new_submission_id,
+            test.get("testScore"),
+            test.get("testWeight"),
+            test.get("testName"),
+            False
+        )
+        cursor.execute(test_query,test_payload)
+
+    conn.commit()
+
+def upload_suspicious_actor(conn, cursor, actorName, actorScore):
+    #check for existence
+
