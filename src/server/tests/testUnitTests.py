@@ -103,10 +103,189 @@ def extension_checker():
     safe_response = TestManager.file_extension_check(safe_target)
     extension_analysis_helper(0,"Safe Files deemed as Malicious",safe_response)
 
+def domain_entropy_checker() :
+    normal_domain = "google.com"
+    suspicious_domain = "slkafjkslad.ru"
 
+    # Test normal domain
+    normal_response = TestManager.domain_entropy_analysis(normal_domain)
+
+    if normal_response["testScore"] != 0 :
+        test_alert("Normal domain was given the wrong entropy score", "Incorrect Domain Entropy Response:")
+        test_information(f"""
+            Domain: {normal_domain}
+            Expected Score: 0
+            Got Score: {str(normal_response["testScore"])}
+            Details: {normal_response["testDetails"]}
+        """)
+    else :
+        test_succeed("google.com correctly returned score 0", "Correct Domain Entropy Response")
+
+    # Test suspicious/random-looking domain
+    suspicious_response = TestManager.domain_entropy_analysis(suspicious_domain)
+
+    if suspicious_response["testScore"] != 100 :
+        test_alert("Suspicious domain was given the wrong entropy score", "Incorrect Domain Entropy Response:")
+        test_information(f"""
+            Domain: {suspicious_domain}
+            Expected Score: 100
+            Got Score: {str(suspicious_response["testScore"])}
+            Details: {suspicious_response["testDetails"]}
+        """)
+    else :
+        test_succeed("Random-looking domain correctly returned score 100", "Correct Domain Entropy Response")
+
+
+def subdomain_checker() :
+    no_subdomain_target = "amazon.com"
+    one_subdomain_target = "login.amazon.com"
+    many_subdomain_target = "hello.hi.fake.abc.ru"
+
+    # test amazon.com
+    no_subdomain_response = TestManager.subdomain_analysis(no_subdomain_target)
+
+    if no_subdomain_response["testScore"] != 0 :
+        test_alert("No-subdomain domain was given the wrong score", "Incorrect Subdomain Response:")
+        test_information(f"""
+            Domain: {no_subdomain_target}
+            Expected Score: 0
+            Got Score: {str(no_subdomain_response["testScore"])}
+            Details: {no_subdomain_response["testDetails"]}
+        """)
+    else :
+        test_succeed("amazon.com correctly returned score 0", "Correct Subdomain Response")
+    
+    # test one subdomain
+    one_subdomain_target = TestManager.subdomain_analysis(one_subdomain_target)
+
+    if one_subdomain_target["testScore"] != 100 :
+        test_alert("One-subdomain domain was given the wrong score", "Incorrect Subdomain Response:")
+        test_information(f"""
+            Domain: {one_subdomain_target}
+            Expected Score: 100
+            Got Score: {str(one_subdomain_target["testScore"])}
+            Details: {one_subdomain_target["testDetails"]}
+        """)
+    else :
+        test_succeed("login.amazon.com correctly returned score 100", "Correct Subdomain Response")
+
+    # test more than 4 subdomain
+    many_subdomain_target = TestManager.subdomain_analysis(many_subdomain_target)
+
+    if many_subdomain_target["testScore"] != 100 :
+        test_alert("Many-subdomain domain was given the wrong score", "Incorrect Subdomain Response:")
+        test_information(f"""
+            Domain: {many_subdomain_target}
+            Expected Score: 100
+            Got Score: {str(many_subdomain_target["testScore"])}
+            Details: {many_subdomain_target["testDetails"]}
+        """)
+    else :
+        test_succeed("Many-subdomain domain correctly returned score 100", "Correct Subdomain Response")
+
+def redirect_checker() :
+    original_redirect_analysis = TestManager.redirect_analysis
+
+    try :
+        # case 1: no redirect and no loop should be 0
+        def fake_no_redirects(url) :
+            return {
+                "is_loop": False,
+                "redirects": 0
+            }
+        
+        TestManager.redirect_analysis = fake_no_redirects
+        no_redirect_response = TestManager.redirect_interpreter("https://example.com")
+
+        if no_redirect_response["testScore"] != 0 :
+            test_alert("No-redirect URL was given the wrong score", "Incorrect Redirect Response:")
+            test_information(f"""
+                Expected Score: 0
+                Got Score: {str(no_redirect_response["testScore"])}
+                Details: {no_redirect_response["testDetails"]}
+            """)
+        else :
+            test_succeed("No-redirect URL correctly returned score 0", "Correct Redirect Response")
+        
+        # case 2: 4 redirects should be 35
+        def fake_medium_redirects(url) :
+            return {
+                "is_loop": False,
+                "redirects": 4
+            }
+        
+        TestManager.redirect_analysis = fake_medium_redirects
+        medium_redirect_response = TestManager.redirect_interpreter("https://example.com")
+
+        if no_redirect_response["testScore"] != 0 :
+            test_alert("Medium-redirect URL was given the wrong score", "Incorrect Redirect Response:")
+            test_information(f"""
+                Expected Score: 35
+                Got Score: {str(medium_redirect_response["testScore"])}
+                Details: {medium_redirect_response["testDetails"]}
+            """)
+        else :
+            test_succeed("Medium-redirect URL correctly returned score 35", "Correct Redirect Response")
+        
+        # case 3 : redirect loop should return 65
+        def fake_redirect_loop(url) :
+            return {
+                "is_loop": True,
+                "redirects": 2
+            }
+        
+        TestManager.redirect_analysis = fake_redirect_loop
+        loop_response = TestManager.redirect_interpreter("https://example.com")
+
+        if no_redirect_response["testScore"] != 0 :
+            test_alert("Medium-redirect URL was given the wrong score", "Incorrect Redirect Response:")
+            test_information(f"""
+                Expected Score: 65
+                Got Score: {str(loop_response["testScore"])}
+                Details: {loop_response["testDetails"]}
+            """)
+        else :
+            test_succeed("Medium-redirect URL correctly returned score 35", "Correct Redirect Response")
+    finally :
+        # storing real redirect_analysis function afterward
+        TestManager.redirect_analysis = original_redirect_analysis
+
+def link_helper_checker() :
+    email_target = "sender@example.com"
+    link_target = "https://login.amazon.com/reset"
+
+    # sender@example.com should become example.com
+    email_domain = TestManager.get_email_domain(email_target)
+
+    if email_domain != "example.com" :
+        test_alert("Email domain extraction failed", "Incorrect get_email_domain response:")
+        test_information(f"""
+            Input: {email_target}
+            Expected: example.com
+            Got: {email_domain}
+        """)
+    else :
+        test_succeed("sender@example.com correctly returned example.com", "Correct get_email_domain response")
+
+    # https://login.amazon.com/reset should become login.amazon.com
+    cleaned_link = TestManager.sanitize_link(link_target)
+
+    if cleaned_link != "login.amazon.com" :
+        test_alert("Link sanitization failed", "Incorrect sanitize_link response")
+        test_information(f"""
+            Input: {link_target}
+            Expected: login.amazon.com
+            Got: {cleaned_link}
+        """)
+    else :
+        test_succeed("httpsL//login.amazon.com/reset correctly returned login.amazon.com", "Correct sanitize_link Response")
 
 
 
 if __name__ == "__main__":
     ai_test()
     extension_checker()
+    domain_entropy_checker()
+    subdomain_checker()
+    redirect_checker()
+    link_helper_checker()
