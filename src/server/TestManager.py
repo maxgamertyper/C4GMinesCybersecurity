@@ -241,7 +241,12 @@ def domain_age_analysis(domain:str):
 
 
     except Exception:
-        return 100
+        return {
+            "testName": "domain_age",
+            "testScore": 100,
+            "testPassed": False,
+            "testDetails": "Domain age lookup failed, treating as suspicious."
+        }
 
 def redirect_interpreter(intial_url: str):
     resultDict = redirect_analysis(intial_url)
@@ -252,7 +257,7 @@ def redirect_interpreter(intial_url: str):
     if loopDetected==True:
         runningScore+=65 # very suspicious thing to do
 
-    redirects = resultDict.get("redirect_count",0)
+    redirects = resultDict.get("redirects",0)
 
     if redirects<=2:
         pass
@@ -268,8 +273,8 @@ def redirect_interpreter(intial_url: str):
     return {
         "testName": "redirect_analysis",
         "testScore": runningScore,
-        "testPassed": runningScore >= 65,
-        "testDetails": "redirects: " + str(redirects) + ", redirect loop detected: " + loopDetected
+        "testPassed": runningScore < 65,
+        "testDetails": "redirects: " + str(redirects) + ", redirect loop detected: " + str(loopDetected)
     }
 
 def redirect_analysis(initial_url: str):
