@@ -237,7 +237,7 @@ if __name__ == "__main__":
     cursor = conn.cursor()
 
     #Check for existence
-    fileHandler.create_if_nonesxistent(conn,cursor)
+    fileHandler.create_if_nonexistent(conn,cursor)
 
     table_analyzer(cursor,"suspicious_actors")
     table_analyzer(cursor,"emails_table")
