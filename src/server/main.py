@@ -34,30 +34,24 @@ def get_health():
 @app.get("/tests")
 def get_tests():
     return {
-        "implementedTests": []
+        "implementedTests": [
+            "ai_analysis",
+            "extension_analysis",
+            "domain_entropy",
+            "subdomain_count",
+            "domain_age",
+            "redirect_analysis"
+            ]
         }
 
 # Temporary endpoint for frontend/backend testing. It receives email data from the Chrome extension and returns a placeholder
 @app.post("/analyze", status_code=status.HTTP_200_OK)
 def post_analyze(email: dict) :
-    #TestManager.run_tests() ONCE FINISHED
-    return {
-        "score": 50,
-        "threatLevel": "likely phishing",
-        "reasons": ["This is a placeholder"],
-        "passedTests": [],
-        "failedTests": [
-            {
-                "testName": "placeholder_test",
-                "testScore": 50,
-                "testWeight": 1,
-                "testPassed": False,
-                "testDetails": "Placeholder"
-            }
-        ],
-        "timestamp": utility.get_time(),
-        "serverVersion": VERSION
-    }
+    testResults = TestManager.run_tests()
+    testResults["timestamp"] = utility.get_time()
+    testResults["serverVersion"] = VERSION
+
+    return testResults
 
 @app.post("/feedback", status_code=status.HTTP_200_OK)
 def post_feedback(feedback:str = Body(embed=True)): # embeds the feedback field into the variable, could just use the payload as a dict if wanted

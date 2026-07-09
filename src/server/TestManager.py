@@ -38,13 +38,27 @@ def return_creator(test_results: dict):
     # TODO
 
 def run_tests(payload: dict):
+    returnPayload = {
+        "score": -1,
+        "threatLevel": "placeholder",
+        "reason": "This is a placeholder.",
+        "passedTests": [],
+        "failedTests": [],
+    }
+
+    #attachments
+    if payload["attachments"]:
+        extensionAnalysis = file_extension_check(payload["attachments"])
+
     #Full analysis
     AIanalysis = ai.request_ai_analysis(payload["subject"], payload["body"], payload["attachments"])
-    
-    #attachment analysis
-    extensionAnalysis = file_extension_check(payload["attachments"])
-    
-
+    AIresults = {
+        "testName": "ai_analysis",
+        "testPassed": AIanalysis.is_phishing,
+        "testScore": round(AIanalysis.confidence * AIanalysis.suspicionScore),
+        "testDetails": AIanalysis.phishingReason
+    }
+    returnPayload["reason"] = AIresults["reason"]
 
     links = [get_email_domain(payload.get("sender","")), *payload.get("links",[])]
 
@@ -66,10 +80,39 @@ def run_tests(payload: dict):
         if redirect_score["testScore"] > worst_redirect_score:
             worst_redirect_score = redirect_score
 
-    
+    tests = [worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score, extensionAnalysis, AIresults]
 
+    if payload["attachments"]:
+        extensionAnalysis["testWeight"] = 25
+        AIresults["testWeight"] = 20
+        worst_age_score["testWeight"] = 15
+        worst_redirect_score["testWeight"] = 15
+        worst_subdomain_score["testWeight"] = 10
+        worst_entropy_score["testWeight"] = 10
+        #worst_database_score["testWeight"] = 10
+    else:
+        worst_age_score["testWeight"] = 25
+        AIresults["testWeight"] = 20
+        worst_redirect_score["testWeight"] = 20
+        worst_subdomain_score["testWeight"] = 15
+        worst_entropy_score["testWeight"] = 10
+        #worst_database_score["testWeight"] = 10
 
-    #TODO: domain analysis, 
+    running_score = 0
+
+    for test in tests:
+        if test["testPassed"]:
+            returnPayload["passedTests"].append(test)
+        else:
+            returnPayload["failedTests"].append(test)
+        running_score += test["testScore"] * test["testWeight"]/100
+
+    returnPayload["score"] = round(running_score+.5)
+    returnPayload["score"] = 100 if returnPayload["score"]>100 else returnPayload["score"] # cap it
+
+    returnPayload["threatLevel"] = "safe" if returnPayload["score"] < 40 else "likely phishing" if returnPayload["score"] < 70 else "phishing"
+
+    return returnPayload
 
 
 # extension check
