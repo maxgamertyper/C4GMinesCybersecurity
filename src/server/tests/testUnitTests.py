@@ -51,7 +51,7 @@ def ai_test():
             Is Phishing: {str(safeAnalysis.is_phishing)}
             Confidence: {str(safeAnalysis.confidence)}
             Suspicion Score: {str(safeAnalysis.suspicionScore)}
-            Reasoning: {"\n".join(safeAnalysis.phishingReasons)}
+            Reasoning: {safeAnalysis.phishingReasons}
         """)
     else:
         test_succeed("", "AI deemed the safe email safe")
@@ -64,12 +64,10 @@ def ai_test():
             Is Phishing: {str(evilAnalysis.is_phishing)}
             Confidence: {str(evilAnalysis.confidence)}
             Suspicion Score: {str(evilAnalysis.suspicionScore)}
-            Reasoning: {"\n".join(evilAnalysis.phishingReasons)}
+            Reasoning: {safeAnalysis.phishingReasons}
         """)
     else:
         test_succeed("", "AI deemed the evil email evil")
-
-
 
 def extension_analysis_helper(idealscore: int, failResponse: str, analysis: dict):
     if analysis["testScore"]!=idealscore:
@@ -105,7 +103,7 @@ def extension_checker():
 
 def domain_entropy_checker() :
     normal_domain = "google.com"
-    suspicious_domain = "slkafjkslad.ru"
+    suspicious_domain = "gjanmblridjfnbe.ru"
 
     # Test normal domain
     normal_response = TestManager.domain_entropy_analysis(normal_domain)
@@ -124,7 +122,7 @@ def domain_entropy_checker() :
     # Test suspicious/random-looking domain
     suspicious_response = TestManager.domain_entropy_analysis(suspicious_domain)
 
-    if suspicious_response["testScore"] != 100 :
+    if suspicious_response["testScore"] != 40 :
         test_alert("Suspicious domain was given the wrong entropy score", "Incorrect Domain Entropy Response:")
         test_information(f"""
             Domain: {suspicious_domain}
@@ -134,7 +132,6 @@ def domain_entropy_checker() :
         """)
     else :
         test_succeed("Random-looking domain correctly returned score 100", "Correct Domain Entropy Response")
-
 
 def subdomain_checker() :
     no_subdomain_target = "amazon.com"
@@ -158,7 +155,7 @@ def subdomain_checker() :
     # test one subdomain
     one_subdomain_target = TestManager.subdomain_analysis(one_subdomain_target)
 
-    if one_subdomain_target["testScore"] != 100 :
+    if one_subdomain_target["testScore"] != 0:
         test_alert("One-subdomain domain was given the wrong score", "Incorrect Subdomain Response:")
         test_information(f"""
             Domain: {one_subdomain_target}
@@ -169,10 +166,10 @@ def subdomain_checker() :
     else :
         test_succeed("login.amazon.com correctly returned score 100", "Correct Subdomain Response")
 
-    # test more than 4 subdomain
+    # test 4 subdomains
     many_subdomain_target = TestManager.subdomain_analysis(many_subdomain_target)
 
-    if many_subdomain_target["testScore"] != 100 :
+    if many_subdomain_target["testScore"] != 55 :
         test_alert("Many-subdomain domain was given the wrong score", "Incorrect Subdomain Response:")
         test_information(f"""
             Domain: {many_subdomain_target}

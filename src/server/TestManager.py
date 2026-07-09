@@ -209,7 +209,7 @@ def domain_entropy_analysis(domain: str):
         }
 
 def subdomain_analysis(domain: str):
-    scoreMap = {0: 100, 1: 100, 2: 85, 3: 60, 4: 15}
+    scoreMap = {0: 0, 1: 0, 2: 15, 3: 55, 4: 85}
     if not domain:
         return {
             "testName":"subdomain_count",
