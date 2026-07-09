@@ -21,7 +21,7 @@ def write_feedback(feedback:str):
 
 
 #sql
-def create_if_nonesxistent(conn, cursor):
+def create_if_nonexistent(conn, cursor):
     cursor.execute("PRAGMA foreign_keys = ON;") # enforce foreign key rules
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS suspicious_actors (
