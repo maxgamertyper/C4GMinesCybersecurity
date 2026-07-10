@@ -1,9 +1,27 @@
-from fastapi import FastAPI, status, Body
+from fastapi import FastAPI, status, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
-from server import utility, fileHandler, TestManager
+from server import fileHandler, utility, TestManager
+from server.utility import VERSION, DATABASE_FILE_PATH
+from contextlib import asynccontextmanager
+import sqlite3
 
-app = FastAPI()
-VERSION = "0.0.1"
+@asynccontextmanager
+async def server_wrapper(app: FastAPI):
+    #run before the server starts accepting requests
+    conn = sqlite3.connect(DATABASE_FILE_PATH, check_same_thread=False)
+    cursor = conn.cursor()
+
+    fileHandler.create_if_nonexistent(conn, cursor)
+
+    #store them in fastAPI
+    app.state.db_conn = conn
+    app.state.db_cursor = cursor
+
+    yield # let the server do stuff
+
+    conn.close() # close after the server shuts off
+
+app = FastAPI(lifespan=server_wrapper)
 
 # Allow the chrome extension/frontend to connect to the backend
 app.add_middleware(
@@ -64,9 +82,13 @@ def post_feedback(feedback:str = Body(embed=True)): # embeds the feedback field 
 
 
 @app.post("/accuracy", status_code=status.HTTP_200_OK)
-def post_accuracy(payload: dict):
+def post_accuracy(payload: dict, request: Request):
+
+    cursor = request.app.state.db_cursor
+    conn = request.app.state.db_conn
 
     # store to database
+    fileHandler.process_accuracy(conn, cursor, payload)
 
     return {
         "timestamp": utility.get_time(),

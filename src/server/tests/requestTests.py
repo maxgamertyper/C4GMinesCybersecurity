@@ -116,7 +116,8 @@ accuracyEndpoint = RouteTestRecord(
     isGET = False,
     postPayload = {
         "body":"Hello, this is an accuracy placeholder body",
-        "sender": "sender@placeholder.com",
+        "senderEmail": "testSender@testing.com",
+        "senderName": "test Sender",
         "subject": "Placeholder Subject",
         "accuracy": True, # pressed yes on the extension
         "attachments": ["hi.exe","suspicious.xlsx"],
