@@ -54,48 +54,67 @@ def run_tests(payload: dict):
     AIanalysis = ai.request_ai_analysis(payload["subject"], payload["body"], payload["attachments"])
     AIresults = {
         "testName": "ai_analysis",
-        "testPassed": AIanalysis.is_phishing,
-        "testScore": round(AIanalysis.confidence * AIanalysis.suspicionScore),
+        "testPassed": not AIanalysis.is_phishing,
+        "testScore": round((AIanalysis.confidence/100) * AIanalysis.suspicionScore + .5),
         "testDetails": AIanalysis.phishingReason
     }
-    returnPayload["reason"] = AIresults["reason"]
+    returnPayload["reason"] = AIresults["testDetails"]
+    if not AIresults["testDetails"]:
+        returnPayload["reason"] = "Email doesn't have any obvious indicators of phishing or malware"
 
     links = [get_email_domain(payload.get("sender","")), *payload.get("links",[])]
 
-    worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score = {"testScore":-1} # make it so that it will be overriden
+    worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score = [{"testScore": -1} for _ in range(4)] # make it so that it will be overriden
 
+    isEmailDomain = True
     for link in links:
         domain = sanitize_link(link)
         age_score = domain_age_analysis(domain)
         subdomain_score = subdomain_analysis(domain)
         entropy_score = domain_entropy_analysis(domain)
-        redirect_score = redirect_interpreter(link)
 
-        if age_score["testScore"] > worst_age_score:
+        if isEmailDomain: # ignore redirect test for the sender domain
+            isEmailDomain = False
+            redirect_score = {
+                "testName": "redirect_analysis",
+                "testScore": 0,
+                "testPassed": True,
+                "testDetails": "Did not analyze Email Domain"
+            }
+        else:
+            redirect_score = redirect_interpreter(link) 
+
+        if age_score["testScore"] > worst_age_score["testScore"]:
             worst_age_score = age_score
-        if subdomain_score["testScore"] > worst_subdomain_score:
+        if subdomain_score["testScore"] > worst_subdomain_score["testScore"]:
             worst_subdomain_score = subdomain_score
-        if entropy_score["testScore"] > worst_entropy_score:
+        if entropy_score["testScore"] > worst_entropy_score["testScore"]:
             worst_entropy_score = entropy_score
-        if redirect_score["testScore"] > worst_redirect_score:
-            worst_redirect_score = redirect_score
+        if redirect_score["testScore"] > worst_redirect_score["testScore"]:
+                worst_redirect_score = redirect_score
 
-    tests = [worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score, extensionAnalysis, AIresults]
+        
+
+    tests = [worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score, AIresults]
+
+    if payload["attachments"]:
+        tests.append(extensionAnalysis)
+    
 
     if payload["attachments"]:
         extensionAnalysis["testWeight"] = 25
         AIresults["testWeight"] = 20
         worst_age_score["testWeight"] = 15
         worst_redirect_score["testWeight"] = 15
-        worst_subdomain_score["testWeight"] = 10
-        worst_entropy_score["testWeight"] = 10
+        worst_subdomain_score["testWeight"] = 15
+        worst_entropy_score["testWeight"] = 5
         #worst_database_score["testWeight"] = 10
     else:
         worst_age_score["testWeight"] = 25
         AIresults["testWeight"] = 20
         worst_redirect_score["testWeight"] = 20
-        worst_subdomain_score["testWeight"] = 15
-        worst_entropy_score["testWeight"] = 10
+        worst_subdomain_score["testWeight"] = 20
+        worst_entropy_score["testWeight"] = 5
         #worst_database_score["testWeight"] = 10
 
     running_score = 0
@@ -110,7 +129,7 @@ def run_tests(payload: dict):
     returnPayload["score"] = round(running_score+.5)
     returnPayload["score"] = 100 if returnPayload["score"]>100 else returnPayload["score"] # cap it
 
-    returnPayload["threatLevel"] = "safe" if returnPayload["score"] < 40 else "likely phishing" if returnPayload["score"] < 70 else "phishing"
+    returnPayload["threatLevel"] = "SAFE" if returnPayload["score"] < 40 else "POTENTIALLY PHISHING" if returnPayload["score"] < 70 else "VERY LIKELY PHISHING"
 
     return returnPayload
 
@@ -170,7 +189,6 @@ def file_extension_check(attachments: list[str]):
 
     return highest_risk_result
 
-
 # domains
 def domain_entropy_analysis(domain: str):
     if not domain: #if its empty
@@ -196,8 +214,8 @@ def domain_entropy_analysis(domain: str):
     elif entropy<4.5:
         return {
             "testName":"domain_entropy",
-            "testScore":45,
-            "testPassed": True,
+            "testScore":50,
+            "testPassed": False,
             "testDetails": "medium domain entropy, slightly suspicious, but could be corporate"
         }
     else:
@@ -241,7 +259,7 @@ def subdomain_analysis(domain: str):
     return {
             "testName":"subdomain_count",
             "testScore": scoreMap[count],
-            "testPassed": True,
+            "testPassed": True if count < 3 else False,
             "testDetails": "counted " + str(count) + " subdomains"
         }
 
@@ -269,7 +287,7 @@ def domain_age_analysis(domain:str):
         if isinstance(creation_date, list):
             creation_date = creation_date[0]
         
-        today = datetime.now()
+        today = datetime.now(creation_date.tzinfo)
         ageDays = (today - creation_date).days
         
         if ageDays<7:
@@ -293,14 +311,12 @@ def domain_age_analysis(domain:str):
             "testPassed": True,
             "testDetails": "older domain, likely safe"
         }
-
-
     except Exception:
         return {
-            "testName": "domain_age",
-            "testScore": 100,
+            "testName":"domain_age",
+            "testScore":100,
             "testPassed": False,
-            "testDetails": "Domain age lookup failed, treating as suspicious."
+            "testDetails": "Error occured while looking up domain, treating as suspicious"
         }
 
 def redirect_interpreter(intial_url: str):
@@ -311,6 +327,9 @@ def redirect_interpreter(intial_url: str):
 
     if loopDetected==True:
         runningScore+=65 # very suspicious thing to do
+    
+    if loopDetected==None:
+        runningScore+=80 # couldnt access site
 
     redirects = resultDict.get("redirects",0)
 
@@ -328,7 +347,7 @@ def redirect_interpreter(intial_url: str):
     return {
         "testName": "redirect_analysis",
         "testScore": runningScore,
-        "testPassed": runningScore < 65,
+        "testPassed": runningScore < 50,
         "testDetails": "redirects: " + str(redirects) + ", redirect loop detected: " + str(loopDetected)
     }
 
@@ -366,8 +385,8 @@ def redirect_analysis(initial_url: str):
                     }
                 
             return {
-                        "is_loop": False,
-                        "redirects": redirect_count,
+                    "is_loop": False,
+                    "redirects": redirect_count,
                     }
     except requests.RequestException:
         return {

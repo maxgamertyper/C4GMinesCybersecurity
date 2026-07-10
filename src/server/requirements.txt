@@ -2,7 +2,7 @@ fastapi[standard]
 rich
 requests
 tldextract
-whois
+python-whois
 fake-useragent
 openai
 python-dotenv

@@ -64,8 +64,8 @@ def get_tests():
 
 # Temporary endpoint for frontend/backend testing. It receives email data from the Chrome extension and returns a placeholder
 @app.post("/analyze", status_code=status.HTTP_200_OK)
-def post_analyze(email: dict) :
-    testResults = TestManager.run_tests()
+def post_analyze(payload: dict) :
+    testResults = TestManager.run_tests(payload=payload)
     testResults["timestamp"] = utility.get_time()
     testResults["serverVersion"] = VERSION
 

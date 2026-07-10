@@ -26,7 +26,7 @@ def test_succeed(text:str, head: str):
 
 
 def ai_test():
-    evilEmailSubject = "Subject: ACTION REQUIRED: Your Microsoft Office 365 Subscription Expires in 24 Hours"
+    evilEmailSubject = "ACTION REQUIRED: Your Microsoft Office 365 Subscription Expires in 24 Hours"
     evilEmailBody="""
     Dear User,
     This is an automated notification from the Microsoft Billing Team. We have detected that your Office 365 business subscription is scheduled to expire in exactly 24 hours. Failure to verify your account and update your billing information will result in the immediate suspension of your email access, and all stored files on OneDrive will be permanently deleted.
@@ -122,7 +122,7 @@ def domain_entropy_checker() :
     # Test suspicious/random-looking domain
     suspicious_response = TestManager.domain_entropy_analysis(suspicious_domain)
 
-    if suspicious_response["testScore"] != 40 :
+    if suspicious_response["testScore"] != 50:
         test_alert("Suspicious domain was given the wrong entropy score", "Incorrect Domain Entropy Response:")
         test_information(f"""
             Domain: {suspicious_domain}

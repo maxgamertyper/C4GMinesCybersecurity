@@ -32,7 +32,8 @@ def request_ai_analysis(subject: str, body: str, attachments: list[str]):
                     "content": (
                         "You are an AI model designed to detect phishing. If you deem something as phishing, "
                         "you must state your reasoning and how confident you are in that analysis. Be concise "
-                        "in your reasoning and maximize it to 3 major reasons as to why this email is phishing. "
+                        "in your reasoning state the most important reason and mention other reasons breifley. "
+                        "Try to keep the reasoning to one sentence or less but two sentences is ok if neccessary"
                         "If you deem the email safe, leave no reasoning and set suspicionScore to 0. "
                         "CRITICAL: If an email is completely normal, safe, and lacks any phishing indicators, "
                         "you must be highly confident that it is safe. Set the confidence score close to 100."

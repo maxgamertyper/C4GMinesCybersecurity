@@ -80,10 +80,9 @@ MASTER_ROUTE_TEST.append(feedbackEndpoint)
 expectedanalyzePayload = {
     "score": None,
     "threatLevel": None,
-    "reasons": None,
+    "reason": None,
     "passedTests": None,
     "failedTests": None,
-    "receivedEmail": None,
     "timestamp": None,
     "serverVersion": None
 }
