@@ -3,7 +3,9 @@
 Built for the 2026 C4G internship at the Colorado School of Mines as Team 5 (Cybersecurity)
 
 **the "Phishermen"**:
+
 **Front-End team**: "frozenpineapplesoda" and "SamuelMcCaskill"
+
 **Back-End team**: "maxgamertyper" and "angellahao"
 
 **Problem Statement -** With the rise of generative AI, the Phishermen saw a dangerous shift toward highly convincing, automated phishing emails designed to steal credentials or financial information from vulnerable people. To prevent this, we designed **"Sushi"** a phishing detector that aims to warn people of potential scam attempts before they happen. By making "Sushi" completely **non-blocking**, all normal email interactions are available to the user while delivering instant visual alerts to keep users informed.
@@ -34,6 +36,8 @@ By analyzing the age, entropy, and behavior of links; the extensions and names o
 * **Automatic Email Scraping**: Zero user input is needed to get the contents of the email and send it to the server for an analysis
 * **Dynamic Alerts**: An analysis returning a bad alert showing that an email is likely phishing will display red, versus an email that is potentially phishing is yellow, or that a safe email is green
 * **Email Detection**: Detects if an email is opened or closed and automatically shows or hides analysis results for an email
+* **Tailored Layout Spacing**: By using extensive visual alignment testing, a beautifully curated UI was created with detailed margins, padding, and colors to ensure easy user experience and understanding
+
 
 ### Back-End
 
