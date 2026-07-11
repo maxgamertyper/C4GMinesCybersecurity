@@ -1,4 +1,4 @@
-from server import ai
+from server import ai, fileHandler
 import os
 from collections import Counter
 import math
@@ -37,13 +37,14 @@ def return_creator(test_results: dict):
     pass
     # TODO
 
-def run_tests(payload: dict):
+def run_tests(payload: dict, conn, cursor):
     returnPayload = {
         "score": -1,
         "threatLevel": "placeholder",
         "reason": "This is a placeholder.",
         "passedTests": [],
         "failedTests": [],
+        "testWeight": 20
     }
 
     #attachments
@@ -56,7 +57,8 @@ def run_tests(payload: dict):
         "testName": "ai_analysis",
         "testPassed": not AIanalysis.is_phishing,
         "testScore": round((AIanalysis.confidence/100) * AIanalysis.suspicionScore + .5),
-        "testDetails": AIanalysis.phishingReason
+        "testDetails": AIanalysis.phishingReason,
+        "testWeight": 20
     }
     returnPayload["reason"] = AIresults["testDetails"]
     if not AIresults["testDetails"]:
@@ -64,14 +66,14 @@ def run_tests(payload: dict):
 
     links = [get_email_domain(payload.get("sender","")), *payload.get("links",[])]
 
-    worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score = [{"testScore": -1} for _ in range(4)] # make it so that it will be overriden
+    worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score, worst_database_score = [{"testScore": -1} for _ in range(5)] # make it so that it will be overriden
 
     isEmailDomain = True
     for link in links:
         domain = sanitize_link(link)
-        age_score = domain_age_analysis(domain)
-        subdomain_score = subdomain_analysis(domain)
-        entropy_score = domain_entropy_analysis(domain)
+        age_score = domain_age_analysis(domain) # 25%
+        subdomain_score = subdomain_analysis(domain) # 30%
+        entropy_score = domain_entropy_analysis(domain) # 15%
 
         if isEmailDomain: # ignore redirect test for the sender domain
             isEmailDomain = False
@@ -81,8 +83,29 @@ def run_tests(payload: dict):
                 "testPassed": True,
                 "testDetails": "Did not analyze Email Domain"
             }
+            
+            databaseScore = database_lookup_test(link,"Email",cursor) # 10%
+
+            linkScore = (
+                age_score["testScore"] * .35 +
+                subdomain_score["testScore"] * .35 +
+                entropy_score["testScore"] * .2 +
+                databaseScore["testScore"] * .1
+                )
+            
         else:
-            redirect_score = redirect_interpreter(link) 
+            redirect_score = redirect_interpreter(link) # 20%
+            databaseScore = database_lookup_test(link,"Domain",cursor) # 10%
+
+            linkScore = (
+                age_score["testScore"] * .25 +
+                subdomain_score["testScore"] * .3 +
+                entropy_score["testScore"] * .15 +
+                databaseScore["testScore"] * .1 +
+                redirect_score["testScore"] * .2
+                )
+        
+        fileHandler.upload_suspicious_actor(conn, cursor, link, "Domain", linkScore)
 
         if age_score["testScore"] > worst_age_score["testScore"]:
             worst_age_score = age_score
@@ -91,11 +114,12 @@ def run_tests(payload: dict):
         if entropy_score["testScore"] > worst_entropy_score["testScore"]:
             worst_entropy_score = entropy_score
         if redirect_score["testScore"] > worst_redirect_score["testScore"]:
-                worst_redirect_score = redirect_score
+            worst_redirect_score = redirect_score
+        if databaseScore["testScore"] > worst_database_score["testScore"]:
+            worst_database_score = databaseScore
 
-        
 
-    tests = [worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score, AIresults]
+    tests = [worst_age_score, worst_subdomain_score, worst_entropy_score, worst_redirect_score, AIresults, worst_database_score]
 
     if payload["attachments"]:
         tests.append(extensionAnalysis)
@@ -103,19 +127,13 @@ def run_tests(payload: dict):
 
     if payload["attachments"]:
         extensionAnalysis["testWeight"] = 25
-        AIresults["testWeight"] = 20
         worst_age_score["testWeight"] = 15
         worst_redirect_score["testWeight"] = 15
         worst_subdomain_score["testWeight"] = 15
-        worst_entropy_score["testWeight"] = 5
-        #worst_database_score["testWeight"] = 10
     else:
         worst_age_score["testWeight"] = 25
-        AIresults["testWeight"] = 20
         worst_redirect_score["testWeight"] = 20
         worst_subdomain_score["testWeight"] = 20
-        worst_entropy_score["testWeight"] = 5
-        #worst_database_score["testWeight"] = 10
 
     running_score = 0
 
@@ -209,21 +227,24 @@ def domain_entropy_analysis(domain: str):
             "testName":"domain_entropy",
             "testScore":0,
             "testPassed": True,
-            "testDetails": "low domain entropy, looks normal"
+            "testDetails": "low domain entropy, looks normal",
+            "testWeight": 5
         }
     elif entropy<4.5:
         return {
             "testName":"domain_entropy",
             "testScore":50,
             "testPassed": False,
-            "testDetails": "medium domain entropy, slightly suspicious, but could be corporate"
+            "testDetails": "medium domain entropy, slightly suspicious, but could be corporate",
+            "testWeight": 5
         }
     else:
         return {
             "testName":"domain_entropy",
             "testScore":100,
             "testPassed": False,
-            "testDetails": "high domain entropy, very suspicious"
+            "testDetails": "high domain entropy, very suspicious",
+            "testWeight": 5
         }
 
 def subdomain_analysis(domain: str):
@@ -406,3 +427,14 @@ def get_email_domain(email: str) -> str:
     if "@" in email:
         return email.split("@")[-1].strip().lower()
     return email # Fallback
+
+def database_lookup_test(domain:str, type:str, cursor):
+    actorScore = fileHandler.lookup_suspicious_actor(cursor, domain, type)
+
+    return {
+        "testName": "database_lookup",
+        "testPassed": actorScore < 50,
+        "testScore": actorScore,
+        "testDetails": "Actor has been analyzed previously" if actorScore!=0 else "Actor has not been found before",
+        "testWeight": 10
+    }
