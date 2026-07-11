@@ -181,71 +181,40 @@ def subdomain_checker() :
         test_succeed("Many-subdomain domain correctly returned score 100", "Correct Subdomain Response")
 
 def redirect_checker() :
-    original_redirect_analysis = TestManager.redirect_analysis
+    no_redirect_response = TestManager.redirect_interpreter("https://bitly.com/98K8eH") # rick roll redirect
+    if no_redirect_response["testScore"] != 10 :
+        test_alert("One-redirect URL was given the wrong score", "Incorrect Redirect Response:")
+        test_information(f"""
+            Expected Score: 0
+            Got Score: {str(no_redirect_response["testScore"])}
+            Details: {no_redirect_response["testDetails"]}
+        """)
+    else :
+        test_succeed("No-redirect URL correctly returned score 0", "Correct Redirect Response")
 
-    try :
-        # case 1: no redirect and no loop should be 0
-        def fake_no_redirects(url) :
-            return {
-                "is_loop": False,
-                "redirects": 0
-            }
-        
-        TestManager.redirect_analysis = fake_no_redirects
-        no_redirect_response = TestManager.redirect_interpreter("https://example.com")
 
-        if no_redirect_response["testScore"] != 0 :
-            test_alert("No-redirect URL was given the wrong score", "Incorrect Redirect Response:")
-            test_information(f"""
-                Expected Score: 0
-                Got Score: {str(no_redirect_response["testScore"])}
-                Details: {no_redirect_response["testDetails"]}
-            """)
-        else :
-            test_succeed("No-redirect URL correctly returned score 0", "Correct Redirect Response")
-        
-        # case 2: 4 redirects should be 35
-        def fake_medium_redirects(url) :
-            return {
-                "is_loop": False,
-                "redirects": 4
-            }
-        
-        TestManager.redirect_analysis = fake_medium_redirects
-        medium_redirect_response = TestManager.redirect_interpreter("https://example.com")
+    medium_redirect_response = TestManager.redirect_interpreter("https://httpbin.org/relative-redirect/8") # 8 relative redirects
+    if medium_redirect_response["testScore"] != 80 :
+        test_alert("High-redirect URL was given the wrong score", "Incorrect Redirect Response:")
+        test_information(f"""
+            Expected Score: 80
+            Got Score: {str(medium_redirect_response["testScore"])}
+            Details: {medium_redirect_response["testDetails"]}
+        """)
+    else :
+        test_succeed("High-redirect URL correctly returned score 35", "Correct Redirect Response")
+    
 
-        if no_redirect_response["testScore"] != 0 :
-            test_alert("Medium-redirect URL was given the wrong score", "Incorrect Redirect Response:")
-            test_information(f"""
-                Expected Score: 35
-                Got Score: {str(medium_redirect_response["testScore"])}
-                Details: {medium_redirect_response["testDetails"]}
-            """)
-        else :
-            test_succeed("Medium-redirect URL correctly returned score 35", "Correct Redirect Response")
-        
-        # case 3 : redirect loop should return 65
-        def fake_redirect_loop(url) :
-            return {
-                "is_loop": True,
-                "redirects": 2
-            }
-        
-        TestManager.redirect_analysis = fake_redirect_loop
-        loop_response = TestManager.redirect_interpreter("https://example.com")
-
-        if no_redirect_response["testScore"] != 0 :
-            test_alert("Medium-redirect URL was given the wrong score", "Incorrect Redirect Response:")
-            test_information(f"""
-                Expected Score: 65
-                Got Score: {str(loop_response["testScore"])}
-                Details: {loop_response["testDetails"]}
-            """)
-        else :
-            test_succeed("Medium-redirect URL correctly returned score 35", "Correct Redirect Response")
-    finally :
-        # storing real redirect_analysis function afterward
-        TestManager.redirect_analysis = original_redirect_analysis
+    loop_response = TestManager.redirect_interpreter("https://dub.sh/PiYXQzZ") # link shortner that redirects to httpbin that redirects back to the shortner
+    if loop_response["testScore"] != 100 :
+        test_alert("Looping URL was given the wrong score", "Incorrect Redirect Response:")
+        test_information(f"""
+            Expected Score: 100
+            Got Score: {str(loop_response["testScore"])}
+            Details: {loop_response["testDetails"]}
+        """)
+    else :
+        test_succeed("Looping URL correctly returned score 35", "Correct Redirect Response")
 
 def link_helper_checker() :
     email_target = "sender@example.com"

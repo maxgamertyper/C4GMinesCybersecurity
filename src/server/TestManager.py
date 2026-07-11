@@ -7,6 +7,7 @@ import whois
 from datetime import datetime
 from fake_useragent import UserAgent
 import requests
+from urllib.parse import urljoin
 
 ua = UserAgent()
 """
@@ -354,8 +355,8 @@ def redirect_interpreter(intial_url: str):
 
     redirects = resultDict.get("redirects",0)
 
-    if redirects<=2:
-        pass
+    if redirects<=2 and redirects>0:
+        runningScore+=10 # not really suspicious, but could be
     elif redirects<=4:
         runningScore+=35
     elif redirects<=7:
@@ -397,7 +398,13 @@ def redirect_analysis(initial_url: str):
                 response = requests.get(current_url, headers=header, allow_redirects=False, timeout=3)
 
                 if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response.headers:
-                    current_url = response.headers['Location'].lower().strip()
+                    redirect_url = response.headers['Location'].lower().strip()
+
+                    if not (redirect_url.startswith("www.") or redirect_url.startswith("http://") or redirect_url.startswith("https://")): # in case of a relative path
+                        current_url = urljoin(current_url,redirect_url)
+                    else: # in case of an absolute path
+                        current_url = redirect_url
+
                     redirect_count += 1
                 else: # no more redirects
                     return {
