@@ -6,10 +6,23 @@ Built for the 2026 C4G internship at the Colorado School of Mines as Team 5 (Cyb
 **Front-End team**: "frozenpineapplesoda" and "SamuelMcCaskill"
 **Back-End team**: "maxgamertyper" and "angellahao"
 
+**Problem Statement -** With the rise of generative AI, the Phishermen saw a dangerous shift toward highly convincing, automated phishing emails designed to steal credentials or financial information from vulnerable people. To prevent this, we designed **"Sushi"** a phishing detector that aims to warn people of potential scam attempts before they happen. By making "Sushi" completely **non-blocking**, all normal email interactions are available to the user while delivering instant visual alerts to keep users informed.
+
+
+
 **Sushi** - A lightweight browser extension designed to analyze emails using embedded URLs, attachments, and text.
 
 By analyzing the age, entropy, and behavior of links; the extensions and names of attachments; and the urgency of the email; A suspicion score is calculated to alert users of emails that are potentially phishing
 
+
+
+**📖 Quick Links:**
+* [Features](#-features)
+* [Future Roadmap](#️-future-roadmap)
+* [Architecture & Design](#-architecture--design)
+* [Installation](#️-installation)
+* [Unit Tests](#-unit-tests)
+* [Disclaimer](#-disclaimer)
 
 ---
 
@@ -18,15 +31,48 @@ By analyzing the age, entropy, and behavior of links; the extensions and names o
 
 ### Front-End
 
+* **Automatic Email Scraping**: Zero user input is needed to get the contents of the email and send it to the server for an analysis
+* **Dynamic Alerts**: An analysis returning a bad alert showing that an email is likely phishing will display red, versus an email that is potentially phishing is yellow, or that a safe email is green
+* **Email Detection**: Detects if an email is opened or closed and automatically shows or hides analysis results for an email
 
 ### Back-End
 
 * **Redirect Chain Tracking**: Tracks the full path a url takes a user (`Site A -> Site B -> Site C`) to catch hidden destinations or anti-analysis loops (`Site A -> Site B -> Site C -> Site A -> ...`)
 * **Domain Age Analysis**: Queries WHOIS data to evaluate how recently a domain was registered
-* **Shannon Entropy Scoring**: Identifies random or algorithimically generated domains commonly used in phishing attemps
-* **Database Tracking**: Uses timestamps to track phishing blasts and (logarithmically) increases suspicion when multiple occurences of a suspicious email occurs.
+* **Shannon Entropy Scoring**: Identifies random or algorithmically generated domains commonly used in phishing attemps
+* **Database Tracking**: Uses timestamps to track phishing blasts and (logarithmically) increases suspicion when multiple occurrences of a suspicious email occurs.
 * **Data Storage**: No user data is stored unless an accuracy rating is submitted to ensure user privacy while building a better system
 * **Non-Linear Scoring**: One score does not determine the safety of the entire email, all scores are weighted and combined to build an overall safety score.
+
+---
+
+## 🗺️ Future Roadmap
+
+If given more development time, the next phases for **Sushi** would include:
+* **Machine Learning Integration:** Integrating small, local Models to dynamically change the weight of tests during analysis upon detection of a phishing campaign and new social engineering tactics.
+* **Cross-Client Support:** Expanding the content script injection layer to support Outlook Web App (OWA) and Apple Mail.
+* **Universal Threat Database** Allowing users to opt-in to sharing malicious links globally to help all **Sushi** users detect malware and social engineering campaigns.
+
+---
+
+## 🧩 Architecture & Design
+
+> Note: names and directories in this section are clickable to open images or directories
+
+### Early Design
+
+To view our early design planning, technical userflows, and database schemas, please visit the [`/docs`](./docs) directory.
+
+* 🖥️ [**Front-End Userflow Chart**](./docs/UserFlow.png) — Detailed mapping of how the user interacts with Gmail, the extension, and the server (*by SamuelMcCaskill*)
+* 🖥️ [**Front-End Mock Up**](./docs/MockExtensionPopup.png) — Simplistic clone of Gmail showing the extension popping up displaying a warning about a "suspicious" email (*by maxgamertyper*)
+* 🗄️ [**Back-End Database Schema**](./docs/DatabaseSchema.png) — Simple diagram showing the different tables and how they link to each other (*by maxgamertyper*)
+* 🗄️ [**System Architecture Diagram**](./docs/SystemArchitectureDiagram.png) — Simple diagram showing how the extension and the server talk to one another (*by angellahao*)
+
+### Tech-Stack
+
+* **Front-End:** Vanilla JavaScript (ES6+), HTML5, CSS3, Chrome Extensions API v3
+* **Back-End API:** Python 3.14, FastAPI
+* **Data & Logic:** Shannon Entropy Algorithms, Live WHOIS Parsing APIs, SQLite, OpenAI library, URL parsing libraries
 
 ---
 
@@ -48,6 +94,7 @@ By analyzing the age, entropy, and behavior of links; the extensions and names o
 
 ---
 
+
 ## 🔒 Unit Tests
 
 To ensure correct operation, this project comes packed with unit tests in the `./src/server/tests` folder
@@ -63,6 +110,6 @@ To test the email analysis functions, go run the `tests/testUnitTests.py` file
 
 ## 📝 Disclaimer
 
-This tool is not professional and was built as part of the C4G@CSM as stated previously.
+This tool is not professional and was built as part of the C4G@CSM for educational learning purposes.
 
 This tool does not prevent interactions with malicious links or attachments, only gives a warning signal based on mathematical calculations and heuristics.
