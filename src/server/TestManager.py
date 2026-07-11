@@ -101,9 +101,9 @@ def run_tests(payload: dict, conn, cursor):
             linkScore = (
                 age_score["testScore"] * .25 +
                 subdomain_score["testScore"] * .3 +
-                entropy_score["testScore"] * .15 +
+                entropy_score["testScore"] * .1 +
                 databaseScore["testScore"] * .1 +
-                redirect_score["testScore"] * .2
+                redirect_score["testScore"] * .25
                 )
         
         fileHandler.upload_suspicious_actor(conn, cursor, link, "Domain", linkScore)

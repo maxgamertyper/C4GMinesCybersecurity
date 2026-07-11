@@ -202,7 +202,7 @@ def redirect_checker() :
             Details: {medium_redirect_response["testDetails"]}
         """)
     else :
-        test_succeed("High-redirect URL correctly returned score 35", "Correct Redirect Response")
+        test_succeed("High-redirect URL correctly returned score 80", "Correct Redirect Response")
     
 
     loop_response = TestManager.redirect_interpreter("https://dub.sh/PiYXQzZ") # link shortner that redirects to httpbin that redirects back to the shortner
@@ -214,7 +214,7 @@ def redirect_checker() :
             Details: {loop_response["testDetails"]}
         """)
     else :
-        test_succeed("Looping URL correctly returned score 35", "Correct Redirect Response")
+        test_succeed("Looping URL correctly returned score 100", "Correct Redirect Response")
 
 def link_helper_checker() :
     email_target = "sender@example.com"
