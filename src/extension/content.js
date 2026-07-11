@@ -5,7 +5,6 @@
   let pendingCheck = null;
 
   const sign = TEST_SCORE > 70 ? "🛑" : TEST_SCORE >= 40 ? "⚠️" : "✅";
-  const color = TEST_SCORE > 70 ? "#d93025" : TEST_SCORE >= 40 ? "#f2994a" : "#188038";
 
   const panelMarkup = `
   <div class="sushi-header">
@@ -14,7 +13,7 @@
   </div>
 
   <div class="sushi-score-wrap">
-    <div class="sushi-score-circle" style="border-color:${color}">
+    <div id="sushi-score-circle" class="sushi-score-circle" style="border-color: #22c55e;">
       <span id="sushi-score" class="sushi-score">0</span>
       <span id="sushi-score-label" class="sushi-score-label">/100</span>
     </div>
@@ -330,6 +329,8 @@ if (closeBtn) {
   })
     }};
     const updatePanel=(data) =>{
+      let color = data.score > 70 ? "#d93025" : data.score >= 40 ? "#f2994a" : "#188038";
+      document.getElementById("sushi-score-circle").style.borderColor = color;
       document.getElementById("sushi-score").textContent = data.score;
       document.getElementById("sushi-status").textContent = data.threatLevel;
       document.getElementById("sushi-reason").textContent = data.reason;
@@ -349,12 +350,12 @@ if (closeBtn) {
       }
       data.passedTests.forEach(test => {
         const li = document.createElement("li");
-        li.textContent = test.testName + ": " +test.testScore +"/100  " + test.Details;
+        li.textContent = test.testName + ": " +test.testScore +"/100  " + test.testDetails;
         passedTests.appendChild(li);
       });
       data.failedTests.forEach(test => {
         const li = document.createElement("li");
-        li.textContent = test.testName + ": " +test.testScore +"/100  " + test.Details;
+        li.textContent = test.testName + ": " +test.testScore +"/100  " + test.testDetails;
         failedTests.appendChild(li);
       });
     }
