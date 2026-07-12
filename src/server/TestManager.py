@@ -211,7 +211,13 @@ def file_extension_check(attachments: list[str]):
 # domains
 def domain_entropy_analysis(domain: str):
     if not domain: #if its empty
-        return 0.0
+        return {
+            "testName":"domain_entropy",
+            "testScore":0,
+            "testPassed": True,
+            "testDetails": "Empty domain Recieved",
+            "testWeight": 5
+        }
     
     frequencies = Counter(domain)
     total_chars = len(domain)
