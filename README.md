@@ -72,6 +72,13 @@ To view our early design planning, technical userflows, and database schemas, pl
 * 🗄️ [**Back-End Database Schema**](./docs/DatabaseSchema.png) — Simple diagram showing the different tables and how they link to each other (*by maxgamertyper*)
 * 🗄️ [**System Architecture Diagram**](./docs/SystemArchitectureDiagram.png) — Simple diagram showing how the extension and the server talk to one another (*by angellahao*)
 
+
+### Current Display
+* [**Safe Result**](./docs/safeSushiResult.png) — sample result that shows all test passed and returned a score of 0
+* [**Potentially Phishing Result**](./docs/potentialSushiResult.png) — sample result that shows some tests failed and returns a score of 50
+* [**Likely Phishing Result**](./docs/phishingSushiResult.png) — sample result that shows all tests failed and returns a score of 100
+
+
 ### Tech-Stack
 
 * **Front-End:** Vanilla JavaScript (ES6+), HTML5, CSS3, Chrome Extensions API v3
