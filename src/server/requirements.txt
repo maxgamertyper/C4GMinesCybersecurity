@@ -1,3 +1,9 @@
 fastapi[standard]
 rich
 requests
+tldextract
+python-whois
+fake-useragent
+openai
+python-dotenv
+pydantic

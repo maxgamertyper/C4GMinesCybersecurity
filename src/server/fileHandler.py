@@ -1,6 +1,7 @@
 from server import utility
 from server.utility import VERSION, CURRENT_DIR
 import os
+import math
 
 # change directory to the same as the file
 FEEDBACK_FILE_PATH = os.path.join(CURRENT_DIR, "feedback.txt")
@@ -204,11 +205,13 @@ def upload_suspicious_actor(conn, cursor, actorName, actorType, actorScore):
 
     conn.commit()
 
-def lookup_suspicious_actor(conn, cursor, actorName, actorType):
-    cursor.execute("SELECT suspicionLevel FROM suspicious_actors WHERE (actorName, actorType) = (?, ?)", (actorName, actorType))
+def lookup_suspicious_actor(cursor, actorName, actorType):
+    cursor.execute("SELECT suspicionLevel, occurrences FROM suspicious_actors WHERE (actorName, actorType) = (?, ?)", (actorName, actorType))
     result = cursor.fetchone()
 
     if not result:
         return 0
     else:
-        return result[0]
+        occurrence_factor = min(1, 0.5*math.log2(result[1] + 1))
+        final_score = result[0] * occurrence_factor
+        return round(final_score + .5)
