@@ -205,7 +205,7 @@ def redirect_checker() :
         test_succeed("High-redirect URL correctly returned score 80", "Correct Redirect Response")
     
 
-    loop_response = TestManager.redirect_interpreter("https://dub.sh/PiYXQzZ") # link shortner that redirects to httpbin that redirects back to the shortner
+    loop_response = TestManager.redirect_interpreter("https://sushiextension.s.gy/2ejLrN") # link shortner that redirects to httpbin that redirects back to the shortner
     if loop_response["testScore"] != 100 :
         test_alert("Looping URL was given the wrong score", "Incorrect Redirect Response:")
         test_information(f"""

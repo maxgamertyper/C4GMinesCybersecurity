@@ -58,10 +58,10 @@ def run_tests(payload: dict, conn, cursor):
         "testName": "ai_analysis",
         "testPassed": not AIanalysis.is_phishing,
         "testScore": round((AIanalysis.confidence/100) * AIanalysis.suspicionScore + .5),
-        "testDetails": AIanalysis.phishingReason,
+        "testDetails": "see Reason",
         "testWeight": 20
     }
-    returnPayload["reason"] = AIresults["testDetails"]
+    returnPayload["reason"] = AIanalysis.phishingReason
     if not AIresults["testDetails"]:
         returnPayload["reason"] = "Email doesn't have any obvious indicators of phishing or malware"
 
@@ -361,7 +361,7 @@ def redirect_interpreter(intial_url: str):
 
     redirects = resultDict.get("redirects",0)
 
-    if redirects<=2 and redirects>0:
+    if redirects<=2:
         runningScore+=10 # not really suspicious, but could be
     elif redirects<=4:
         runningScore+=35
