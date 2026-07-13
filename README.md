@@ -77,7 +77,7 @@ To view our early design planning, technical userflows, and database schemas, pl
 * [**Safe Result**](./docs/safeSushiResult.png) — sample result that shows all test passed and returned a score of 0
 * [**Potentially Phishing Result**](./docs/potentialSushiResult.png) — sample result that shows some tests failed and returns a score of 50
 * [**Likely Phishing Result**](./docs/phishingSushiResult.png) — sample result that shows all tests failed and returns a score of 100
-
+* [**Example Usage Video**](https://www.youtube.com/watch?v=0CGIPyjGfcw)  — youtube video that shows installation and examples of multiple features (not all)
 
 ### Tech-Stack
 
