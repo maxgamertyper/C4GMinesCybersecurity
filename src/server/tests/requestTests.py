@@ -236,4 +236,6 @@ def test_endpoints(MASTER_ROUTE_TEST: list):
 
         route_test(routeTestRecord)
 
-test_endpoints(MASTER_ROUTE_TEST)
+
+if __name__ == "__main__":
+    test_endpoints(MASTER_ROUTE_TEST)
