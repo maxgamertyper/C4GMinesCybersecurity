@@ -353,8 +353,11 @@ def redirect_interpreter(intial_url: str):
 
     loopDetected = resultDict.get("is_loop",False)
 
-    if loopDetected==True or loopDetected==None:
-        runningScore+=80 # very suspicious thing to do
+    if loopDetected==True:
+        runningScore+=100 # very suspicious thing to do
+
+    if loopDetected==None:
+        runningScore+=80
 
     redirects = resultDict.get("redirects",0)
 
