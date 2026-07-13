@@ -353,11 +353,8 @@ def redirect_interpreter(intial_url: str):
 
     loopDetected = resultDict.get("is_loop",False)
 
-    if loopDetected==True:
-        runningScore+=65 # very suspicious thing to do
-    
-    if loopDetected==None:
-        runningScore+=80 # couldnt access site
+    if loopDetected==True or loopDetected==None:
+        runningScore+=80 # very suspicious thing to do
 
     redirects = resultDict.get("redirects",0)
 
@@ -384,7 +381,7 @@ def redirect_analysis(initial_url: str):
         "User-Agent": ua.random
     }
     visited_urls = set()
-    current_url = initial_url.lower().strip()
+    current_url = initial_url.strip()
     redirect_count = 0
 
     try:
@@ -401,10 +398,10 @@ def redirect_analysis(initial_url: str):
 
                 visited_urls.add(current_url)
 
-                response = requests.get(current_url, headers=header, allow_redirects=False, timeout=3)
+                response = session.get(current_url, headers=header, allow_redirects=False, timeout=3)
 
                 if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response.headers:
-                    redirect_url = response.headers['Location'].lower().strip()
+                    redirect_url = response.headers['Location'].strip()
 
                     if not (redirect_url.startswith("www.") or redirect_url.startswith("http://") or redirect_url.startswith("https://")): # in case of a relative path
                         current_url = urljoin(current_url,redirect_url)
