@@ -91,16 +91,21 @@ To view our early design planning, technical user flows, and database schemas, p
 
 1. Clone or download this repository to your PC
 2. Open your browser and navigate to the extensions page:
+
    * **Chrome/Edge:** `chrome://extensions/`
+   
    * **Firefox:** `about:debugging`
-3. Enable **Developer mode** (usually a toggle in the top-right corner).
-4. Click **Load unpacked** and select the folder containing this extension's source code.
-5. Install a Python version that supports the packages in `requirements.txt`, it is coded in **Python3.14**
-6. Open **VS Code** or a terminal window
-7. Change your base directory to the local repository `cd {your_file_location}`
-8. Run `pip install -r requirements.txt` for your Python version
-9. Run `fastapi dev ./src/server/main.py` to start the server
-10. Go to "mail.google.com" and open an email to see the extension work its magic
+  
+4. Enable **Developer mode** (usually a toggle in the top-right corner).
+5. Click **Load unpacked** and select the folder containing this extension's source code.
+6. Install a Python version that supports the packages in `requirements.txt`, it is coded in **Python3.14**
+7. Open **VS Code** or a terminal window
+8. Change your base directory to the local repository `cd {your_file_location}`
+9. Run `pip install -r requirements.txt` for your Python version
+10. Get a model API key from GitHub models
+11. Create a .env file containing `SUSHI_API_KEY = {Your_Key}`
+12. Run `fastapi dev ./src/server/main.py` to start the server
+13. Go to "mail.google.com" and open an email to see the extension work its magic
 
 
 ---
