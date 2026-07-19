@@ -77,7 +77,6 @@ def post_analyze(payload: dict, request: Request) :
 
 @app.post("/feedback", status_code=status.HTTP_200_OK)
 def post_feedback(feedback:str = Body(embed=True)): # embeds the feedback field into the variable, could just use the payload as a dict if wanted
-    print(feedback)
     fileHandler.write_feedback(feedback)
     return {
         "status": "received",

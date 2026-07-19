@@ -97,13 +97,14 @@ def create_if_nonexistent(conn, cursor):
 
 def process_accuracy(conn, cursor, payload: dict):
     #email table
+    payload = payload.get("data",{})
+    #implement senderName later potentially
     email_query = """
-        INSERT INTO emails_table (senderName, senderEmail, subject, body)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO emails_table (senderEmail, subject, body)
+        VALUES (?, ?, ?)
     """
     email_payload = (
-        payload.get("senderName",""),
-        payload.get("senderEmail",""),
+        payload.get("sender",""),
         payload.get("subject",""),
         payload.get("body","")
     )
@@ -118,10 +119,11 @@ def process_accuracy(conn, cursor, payload: dict):
     """
     for attachment in payload.get("attachments",[]):
         seperation_dict = utility.extension_splitter(attachment)
+        name, extension = os.path.splitext(attachment)
         attachments_payload = (
             new_email_id,
-            seperation_dict.get("name",""),
-            seperation_dict.get("extension","")
+            name,
+            extension
         )
         cursor.execute(attachments_query,attachments_payload)
 
@@ -133,11 +135,11 @@ def process_accuracy(conn, cursor, payload: dict):
     """
     analysis_payload = (
         new_email_id,
-        payload.get("accuracy",False),
+        payload.get("feedback",'safe')=='safe',
         VERSION,
-        analysis_payload_request.get("score"),
-        analysis_payload_request.get("threatLevel"),
-        analysis_payload_request.get("reason")
+        analysis_payload_request.get("score",-1),
+        analysis_payload_request.get("threatLevel",-1),
+        analysis_payload_request.get("reason","placeholder reason")
     )
     cursor.execute(analysis_query,analysis_payload)
 
