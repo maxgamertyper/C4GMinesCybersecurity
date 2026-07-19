@@ -226,20 +226,20 @@ const styles = `
     return await response.json();
   }
 
-  async function sendFeedback(feedback) {
+  async function sendFeedback(emailData, feedback) {
+    const payload ={
+      data: emailData,
+      feedback: feedback
+    }
     try {
       const response = await fetch("http://127.0.0.1:8000/accuracy", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          feedback: feedback
-        })
+        body: JSON.stringify(payload)
       });
-
-      const data = await response.json();
-      console.log("Feedback sent:", data);
+      console.log("Payload sent:", payload);
 
     } catch (error) {
       console.error("Error sending feedback:", error);
@@ -306,12 +306,14 @@ const styles = `
 }
 
     safeBtn.addEventListener("click", () => {
-      sendFeedback("safe");
+      const emaildata = scrapeEmailContent();
+      sendFeedback(emaildata, "safe");
       showThankYou();
     });
 
     phishingBtn.addEventListener("click", () => {
-      sendFeedback("phishing");
+      const emaildata = scrapeEmailContent();
+      sendFeedback(emaildata, "phishing");
       showThankYou();
     });
 
